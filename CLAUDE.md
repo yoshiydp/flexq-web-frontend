@@ -16,6 +16,18 @@ yarn start
 
 # Lint
 yarn lint
+
+# ユニットテスト (Jest)
+yarn test                 # ウォッチモード
+yarn test:ci              # カバレッジ付き実行 (CI)
+
+# 単一テストファイルの実行
+yarn test src/components/ui/StoreLinks.test.tsx
+
+# E2E テスト (Playwright) ※ 事前に yarn build が必要（webServer が yarn start を自動起動）
+yarn e2e                  # 全フロー（desktop / mobile 両プロジェクト）
+yarn e2e:ui               # UI モードでデバッグ実行
+npx playwright test e2e/top-page.spec.ts   # 単一フロー
 ```
 
 開発サーバー: `http://localhost:3000`
@@ -127,9 +139,13 @@ lyrics-web-frontend/
 
 | パス | ファイル | 説明 |
 |------|---------|------|
-| `/` | `src/app/page.tsx` | トップページ |
+| `/` | `src/app/page.tsx` | トップページ（Hero〜CTA の全セクション） |
 | `/news` | `src/app/news/page.tsx` | ニュース一覧 |
 | `/news/[slug]` | `src/app/news/[slug]/page.tsx` | ニュース詳細 |
+| `/tutorials` | `src/app/tutorials/page.tsx` | チュートリアル一覧 |
+| `/tutorials/[slug]` | `src/app/tutorials/[slug]/page.tsx` | チュートリアル詳細 |
+| `/columns` | `src/app/columns/page.tsx` | コラム一覧 |
+| `/columns/[slug]` | `src/app/columns/[slug]/page.tsx` | コラム詳細 |
 
 ---
 
@@ -141,25 +157,32 @@ Strapi の REST API を Next.js の `fetch` + `revalidate`（ISR）で取得し�
 
 ```typescript
 // ISR: 60秒ごとに再生成
-const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/news?populate=*&sort=publishedAt:desc`, {
+const res = await fetch(`${process.env.NEXT_PUBLIC_STRAPI_URL}/api/news-articles?populate=*&sort=publishedAt:desc`, {
   next: { revalidate: 60 },
 });
 ```
 
+取得・マッピング・フォールバック処理は `src/lib/strapi.ts`（fetch ラッパー）と `src/lib/content.ts`（コンテンツ解決層）に集約されています。新しい API を叩く場合もこの 2 ファイルを経由してください。
+
 ### API エンドポイント
 
+> パスは各 content type の `pluralName` に基づきます（News の pluralName は `news-articles`。`/api/news` ではないことに注意）。
+
 ```
+# トップページ (single type)
+GET /api/top-page?populate[features]=*&populate[screens][populate]=screenshot&populate[faqs]=*&populate[cta]=*
+
 # ニュース一覧
-GET /api/news?populate=*&sort=publishedAt:desc
+GET /api/news-articles?populate=*&sort=publishedAt:desc
 
 # ニュース詳細（スラッグ指定）
-GET /api/news?filters[slug][$eq]={slug}&populate=*
+GET /api/news-articles?filters[slug][$eq]={slug}&populate=*
 
-# カテゴリー一覧
-GET /api/categories?populate=*
+# チュートリアル一覧（連載順）
+GET /api/tutorials?populate=*&sort=order:asc
 
-# 著者一覧
-GET /api/authors?populate=*
+# コラム一覧
+GET /api/columns?populate=*&sort=publishedAt:desc
 ```
 
 ### レスポンス形式（Strapi v5 REST）
@@ -341,6 +364,38 @@ import { cn } from "@/lib/utils";
 
 ---
 
+## テスト
+
+### ユニットテスト（Jest + Testing Library）
+
+- テストはソースファイルと同じ場所に配置します（`Component.tsx` の隣に `Component.test.tsx`。flexq-mobile と同じ流儀）
+- 設定: `jest.config.mjs`（`next/jest` プリセット・jsdom 環境）+ `jest.setup.ts`（`@testing-library/jest-dom`）
+- `src/components/canvas/`（WebGL）は jsdom でテスト不能のためカバレッジ対象外
+- データ層（`src/lib/content.ts`）のテストは `global.fetch` をモックして行う（実 Strapi には接続しない）
+- リンクテキストが `&nbsp;` 区切りの要素（例: `VIEW ALL →`）は正規表現 `\s` でマッチさせる
+
+### E2E テスト（Playwright）※ flexq-mobile の Maestro に相当
+
+フローは `e2e/*.spec.ts` に配置します。`desktop` / `mobile`（iPhone 14 ビューポート）の 2 プロジェクトで全フローが実行されます。
+
+**実行前提:**
+- `yarn build` 済みであること（`playwright.config.ts` の webServer が `yarn start --port 3200` を自動起動・終了する）
+- 起動済みサーバーを流用する場合は `PLAYWRIGHT_BASE_URL=http://localhost:3000 yarn e2e`
+- Strapi（localhost:1337）は**起動していなくてもよい**。トップページはフォールバック文言で描画され、記事フローはデータがなければ空状態を検証する設計
+- 初回のみ `npx playwright install chromium` が必要
+
+**フロー作成時のルール:**
+- ロケーターはセクションにスコープする（例: `page.locator("#faq").getByText(...)`）。同一文言が News 抜粋と FAQ 回答など複数箇所に存在し得るため
+- ビューポート依存の UI（PC ナビ / SP メニュー）は `test.skip(isMobile, ...)` / `test.skip(!isMobile, ...)` で分岐する
+- SP メニューのオーバーレイは `data-testid="mobile-menu"` で特定する
+- CMS データに依存するアサーションは「データあり / 空状態」のどちらでも成立するように書く
+
+### コードレビュー（Codex CLI）
+
+コミット前に `/codex-review` を実行し、妥当な指摘に対応してからコミットする。実体は `codex review --base develop`（要 Codex CLI: `npm install -g @openai/codex` + `codex login`）。今回の diff と無関係な既存問題・誤検知は対応せず、その旨を報告する。コマンド定義: `.claude/commands/codex-review.md`
+
+---
+
 ## ブランチ運用
 
 ```
@@ -432,8 +487,10 @@ echo "https://your-strapi-prod.strapiapp.com" | vercel env add NEXT_PUBLIC_STRAP
 ### デプロイ前チェック
 
 ```bash
-yarn build   # ビルドエラーがないか確認
-yarn lint    # Lint エラーがないか確認
+yarn lint      # Lint エラーがないか確認
+yarn test:ci   # ユニットテストが通るか確認
+yarn build     # ビルドエラーがないか確認
+yarn e2e       # E2E が通るか確認（build 後に実行）
 ```
 
 ---

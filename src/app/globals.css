@@ -23,10 +23,13 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-purple-deep: var(--purple-deep);
+  --color-purple-mid: var(--purple-mid);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-qwigley: var(--font-qwigley);
   --radius: var(--radius-base);
+  --animate-pulse-glow: pulse-glow 6s ease-in-out infinite;
 }
 
 /*
@@ -74,9 +77,35 @@
   --ring: #FFD700;
 
   --radius-base: 0.5rem;
+
+  /* FlexQ promo site — hero 由来のパープル（暗紫 → 黒 → 暗紫 のサンドイッチ構造用） */
+  --purple-deep: #130722;
+  --purple-mid: #6C3483;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+/* SP カルーセルのスクロールバー非表示 */
+@utility scrollbar-hide {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+html {
+  scroll-behavior: smooth;
 }

@@ -19,8 +19,9 @@ const qwigley = Qwigley({
 });
 
 export const metadata: Metadata = {
-  title: "Lyrics",
-  description: "Your Music. Your Words.",
+  title: "FlexQ — YOUR MUSIC. YOUR WORDS.",
+  description:
+    "FlexQ は、シンガー・ラッパー・ミュージシャンのためのリリック制作アプリです。",
 };
 
 export default function RootLayout({
@@ -30,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} ${qwigley.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

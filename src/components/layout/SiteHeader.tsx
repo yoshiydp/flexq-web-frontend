@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import FlexQLogo from "@/components/FlexQLogo";
 import { DOWNLOAD_ANCHOR, type NavLink } from "@/components/layout/navLinks";
@@ -23,11 +24,19 @@ type Props = {
 export default function SiteHeader({ links, appStoreUrl, googlePlayUrl }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
+  // SP のトップページはヒーローの大ロゴと重複するため、ヘッダーのロゴを出さない
+  const isTopPage = usePathname() === "/";
 
   return (
     <>
       <header className="absolute inset-x-0 top-0 z-10 flex flex-wrap items-center justify-between gap-y-3 px-[clamp(20px,4vw,48px)] py-5">
-        <Link href="/" aria-label="FlexQ" onClick={closeMenu}>
+        {/* svg のインラインベースライン余白でナビと上下中央がずれないよう flex 化する */}
+        <Link
+          href="/"
+          aria-label="FlexQ"
+          onClick={closeMenu}
+          className={cn("flex items-center", isTopPage && "max-md:hidden")}
+        >
           <FlexQLogo className="h-10 w-auto text-primary drop-shadow-[0_0_16px_rgba(255,215,0,.4)]" />
         </Link>
 
@@ -37,21 +46,21 @@ export default function SiteHeader({ links, appStoreUrl, googlePlayUrl }: Props)
             <a
               key={link.href}
               href={link.href}
-              className="font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+              className="font-mono text-sm tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
             >
               {link.label}
             </a>
           ))}
           <a
             href={DOWNLOAD_ANCHOR}
-            className="rounded-full bg-primary px-[22px] py-2.5 font-mono text-xs font-medium tracking-[.2em] text-primary-foreground transition-colors hover:bg-[#FFE44D]"
+            className="rounded-full bg-primary px-7 py-3 font-mono text-sm font-medium tracking-[.2em] text-primary-foreground transition-colors hover:bg-[#FFE44D]"
           >
             DOWNLOAD
           </a>
         </nav>
 
-        {/* SP: DOWNLOAD ピル + ハンバーガー */}
-        <div className="flex items-center gap-3 md:hidden">
+        {/* SP: DOWNLOAD ピル + ハンバーガー（ロゴ非表示時も右端を維持するため ml-auto） */}
+        <div className="ml-auto flex items-center gap-3 md:hidden">
           <a
             href={DOWNLOAD_ANCHOR}
             className="inline-flex items-center whitespace-nowrap rounded-full bg-primary px-[18px] py-3 font-mono text-[11px] font-medium tracking-[.2em] text-primary-foreground transition-colors hover:bg-[#FFE44D]"

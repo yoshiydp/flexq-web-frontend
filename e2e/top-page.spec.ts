@@ -38,6 +38,14 @@ test.describe("トップページ", () => {
     await expect(cta.getByRole("link", { name: /Google Play/ })).toBeVisible();
   });
 
+  test("SCROLL インジケーターで最初のコンテンツへスクロールする", async ({
+    page,
+  }) => {
+    await page.getByRole("link", { name: "コンテンツへスクロール" }).click();
+    await expect(page).toHaveURL(/#statement$/);
+    await expect(page.locator("#statement")).toBeInViewport();
+  });
+
   test("PC ナビからセクションへ移動できる", async ({ page, isMobile }) => {
     test.skip(isMobile, "PC ナビは 768px 以上のみ表示");
 

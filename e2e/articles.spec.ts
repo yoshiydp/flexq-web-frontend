@@ -59,12 +59,15 @@ test.describe("記事一覧・詳細", () => {
     await expect(page.getByRole("article")).toBeVisible();
   });
 
-  test("存在しない記事は 404 を返す", async ({ page }) => {
-    const response = await page.goto("/news/no-such-article");
-    const status = response?.status();
-    // CMS 未起動時は「実在記事を 404 と誤判定しない」設計により 500 になるため、
-    // このテストは CMS 到達可能な場合のみ検証する
-    test.skip(status === 500, "CMS（Strapi）未起動のためスキップ");
-    expect(status).toBe(404);
+  test("存在しない記事は 404 ページを表示する", async ({ page }) => {
+    // ルート loading.tsx によるストリーミング配信のため HTTP ステータスは 200 になる。
+    // ステータスではなく 404 画面（not-found.tsx）の表示で検証する
+    await page.goto("/news/no-such-article");
+    const notFound = page.getByText("PAGE NOT FOUND");
+    const errorUi = page.getByText(/something went wrong/i);
+    await expect(notFound.or(errorUi).first()).toBeVisible();
+    // CMS 未起動時は「実在記事を 404 と誤判定しない」設計によりエラー表示になるためスキップ
+    test.skip(await errorUi.isVisible(), "CMS（Strapi）未起動のためスキップ");
+    await expect(notFound).toBeVisible();
   });
 });

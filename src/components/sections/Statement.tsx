@@ -1,4 +1,5 @@
 import SectionBackground from "@/components/ui/SectionBackground";
+import { WAVEFORM_PATH } from "@/components/ui/waveformPath";
 import type { TopPageContent } from "@/types/content";
 
 type Props = {
@@ -11,7 +12,10 @@ type Props = {
  */
 export default function Statement({ statement }: Props) {
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(to_bottom,#130722_0%,#150A20_45%,#0D0D0D_100%)] px-[clamp(20px,5vw,48px)] pt-[clamp(80px,10vw,140px)] pb-[clamp(88px,11vw,150px)]">
+    <section
+      id="statement"
+      className="relative overflow-hidden bg-[linear-gradient(to_bottom,#130722_0%,#150A20_45%,#0D0D0D_100%)] px-[clamp(20px,5vw,48px)] pt-[clamp(80px,10vw,140px)] pb-[clamp(88px,11vw,150px)]"
+    >
       <SectionBackground src="/bg-statement.png" imageOpacityClassName="opacity-80" />
 
       {/* 上部パープルグロー */}
@@ -39,7 +43,7 @@ export default function Statement({ statement }: Props) {
         className="relative mt-[clamp(48px,8vw,90px)] block h-20 w-full"
       >
         <path
-          d="M0 40 Q 90 34 180 40 T 360 40 Q 420 22 480 40 T 640 40 Q 700 52 760 40 T 920 40 Q 990 26 1060 40 T 1240 40 Q 1340 46 1440 40"
+          d={WAVEFORM_PATH}
           stroke="#FFD700"
           strokeWidth="1.5"
           fill="none"

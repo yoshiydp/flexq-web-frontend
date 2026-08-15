@@ -443,16 +443,19 @@ git push origin master    # Vercel に本番デプロイ
 
 | 項目 | 値 |
 |------|---|
-| プロジェクト名 | `lyrics-web/lyrics-web-frontend` |
-| 本番 URL | https://lyrics-web-frontend.vercel.app |
-| ダッシュボード | https://vercel.com/lyrics-web/lyrics-web-frontend |
+| プロジェクト名 | `flexq-web`（FlexQ Web チーム。旧 `lyrics-web-frontend` から 2026-08-15 リネーム） |
+| 本番 URL | https://flexq-web-frontend.vercel.app |
+| 旧 URL | `lyrics-web-frontend.vercel.app`（新 URL へ 307 リダイレクト） |
+| ダッシュボード | Vercel「FlexQ Web」チーム内の `flexq-web` プロジェクト |
+
+> 本番用の独自ドメイン（外部レジストラで取得予定）は未設定。追加したら本番 URL をそちらに更新し、`flexq-web-frontend.vercel.app` はテスト・確認用として並存させる。
 
 ### 自動デプロイ（GitHub 連携済み）
 
 | ブランチ | デプロイ先 | URL |
 |---------|-----------|-----|
-| `master` | Production | https://lyrics-web-frontend.vercel.app |
-| `staging` | Preview | `lyrics-web-frontend-git-staging-lyrics-web.vercel.app`（固定） |
+| `master` | Production | https://flexq-web-frontend.vercel.app |
+| `staging` | Preview | `flexq-web-git-staging-*.vercel.app`（固定・正確な URL はダッシュボード参照） |
 | `feature/*` 等 | Preview | ブランチごとに URL が自動発行 |
 
 ### 環境変数

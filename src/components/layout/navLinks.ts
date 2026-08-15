@@ -4,6 +4,8 @@
  * ルート付きアンカー（/#...）にしている。
  */
 
+import { routes } from "@/lib/routes";
+
 export type NavLink = { href: string; label: string };
 
 export const NAV_LINKS: readonly NavLink[] = [
@@ -34,3 +36,12 @@ export function visibleNavLinks({
 
 /** ダウンロード CTA セクションへのアンカー */
 export const DOWNLOAD_ANCHOR = "/#download";
+
+/**
+ * フッターのみに表示する規約・ポリシーページへのリンク。
+ * （Google OAuth 同意画面のブランディング設定が参照する公開 URL）
+ */
+export const LEGAL_LINKS: readonly NavLink[] = [
+  { href: routes.privacyPolicy, label: "PRIVACY POLICY" },
+  { href: routes.terms, label: "TERMS" },
+];

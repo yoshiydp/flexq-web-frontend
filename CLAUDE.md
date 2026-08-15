@@ -503,5 +503,19 @@ yarn e2e       # E2E が通るか確認（build 後に実行）
 | 環境 | フロントエンド | Strapi |
 |------|--------------|--------|
 | ローカル | `yarn dev`（localhost:3000） | `yarn develop`（localhost:1337） |
-| STG | Vercel Preview（`staging` ブランチ） | Strapi Cloud（STG 環境） |
-| 本番 | Vercel Production（`master` ブランチ） | Strapi Cloud（本番環境） |
+| STG | Vercel Preview（`staging` ブランチ） | 未接続（CMS 休止中） |
+| 本番 | Vercel Production（`master` ブランチ） | 未接続（CMS 休止中） |
+
+### CMS 休止中の運用（2026-08-15 決定）
+
+Strapi Cloud が基本有料のため、**本番 CMS の接続は当面見送り**とした（運営側の方針としても LP はアプリの訴求に焦点を当てる）。今後の運用状況を見て復活を判断する。
+
+- 本番はフォールバック文言（`src/content/fallbacks.ts`）による**静的 LP として公開中**。トップページは完成状態で表示され、News / Learn セクション・そのナビリンク・記事ページ導線は自動的に非表示になる（この挙動は設計どおり）
+- **CMS 連携の実装（記事ページ・top-page single type・データ層）はコードとして温存**する。削除しないこと。ローカル開発では従来どおり `lyrics-web-strapi` を起動すれば全機能を確認できる
+- 文言修正は当面 `src/content/fallbacks.ts` を直接編集してリリースする
+
+**CMS を復活させる手順**（判断が下りたらこれだけで戻せる）:
+1. Strapi をホスティング（Strapi Cloud なら `lyrics-web-strapi` の master を接続。bootstrap が権限付与・初期データ投入を自動実行する）
+2. ホスティング側の env に `FRONTEND_URLS=https://flexq-web-frontend.vercel.app` を設定（CORS）
+3. Vercel の Production 環境変数 `NEXT_PUBLIC_STRAPI_URL` に CMS の URL を設定 → **Redeploy**
+4. 管理画面で本番コンテンツ（記事・CTA のストア URL・アプリスクリーンショット）を投入 → ISR（60 秒）で反映

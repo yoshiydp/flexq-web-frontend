@@ -10,4 +10,6 @@ export const routes = {
   tutorial: (slug: string) => `/tutorials/${slug}`,
   columns: "/columns",
   column: (slug: string) => `/columns/${slug}`,
+  privacyPolicy: "/privacy-policy",
+  terms: "/terms",
 } as const;

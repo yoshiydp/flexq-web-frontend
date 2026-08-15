@@ -5,18 +5,20 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { vertexShader, fragmentShader } from "./shaders";
 
+// uniforms は同一参照のまま値だけを毎フレーム更新する（r3f の定石）。
+// このシーンはヒーローの単一インスタンス前提のためモジュールスコープに置く。
+const uniforms = {
+  uTime: { value: 0 },
+  uResolution: { value: new THREE.Vector2() },
+};
+
 export default function GlitchScene() {
   const meshRef = useRef<THREE.Mesh>(null);
   const { size } = useThree();
 
-  const uniforms = useRef({
-    uTime: { value: 0 },
-    uResolution: { value: new THREE.Vector2(size.width, size.height) },
-  });
-
   useFrame(({ clock }) => {
-    uniforms.current.uTime.value = clock.getElapsedTime();
-    uniforms.current.uResolution.value.set(size.width, size.height);
+    uniforms.uTime.value = clock.getElapsedTime();
+    uniforms.uResolution.value.set(size.width, size.height);
   });
 
   return (
@@ -25,7 +27,7 @@ export default function GlitchScene() {
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
-        uniforms={uniforms.current}
+        uniforms={uniforms}
         depthTest={false}
         depthWrite={false}
       />

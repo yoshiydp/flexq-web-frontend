@@ -30,7 +30,7 @@ export default function Statement({ statement }: Props) {
         <h2 className="text-[clamp(30px,4.5vw,56px)] font-semibold leading-[1.35] tracking-[.02em] text-foreground [text-shadow:3px_0_0_rgba(108,52,131,.55),-3px_0_0_rgba(255,215,0,.18)] [text-wrap:balance] whitespace-pre-line">
           {statement.heading}
         </h2>
-        <p className="max-w-[640px] text-[17px] leading-8 text-secondary-foreground [text-wrap:pretty]">
+        <p className="max-w-[640px] text-[17px] leading-8 text-secondary-foreground [text-wrap:pretty] whitespace-pre-line">
           {statement.body}
         </p>
       </div>

@@ -13,7 +13,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/"
-        className="btn-sheen mt-2 rounded-full bg-primary px-7 py-3 font-mono text-sm font-medium tracking-[.2em] text-primary-foreground transition-[background-color,box-shadow,transform] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 hover:bg-[#FFE44D] hover:shadow-[0_0_28px_rgba(255,215,0,.45)] active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0"
+        className="btn-sheen mt-2 rounded-full bg-primary px-7 py-3 font-mono text-sm font-medium tracking-[.2em] text-primary-foreground transition-[background-color,box-shadow,transform,translate] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 hover:bg-[#FFE44D] hover:shadow-[0_0_28px_rgba(255,215,0,.45)] active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0"
       >
         BACK TO TOP
       </Link>

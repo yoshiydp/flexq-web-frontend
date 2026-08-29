@@ -3,7 +3,7 @@ import { DOWNLOAD_ANCHOR } from "@/components/layout/navLinks";
 import { cn } from "@/lib/utils";
 
 const storeButton = cva(
-  "group btn-sheen inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full text-[15px] font-semibold tracking-[.05em] no-underline transition-[background-color,box-shadow,transform,border-color] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0",
+  "group btn-sheen inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full text-[15px] font-semibold tracking-[.05em] no-underline transition-[background-color,box-shadow,transform,translate,border-color] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0",
   {
     variants: {
       variant: {

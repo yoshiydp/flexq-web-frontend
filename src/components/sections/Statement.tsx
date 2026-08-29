@@ -24,7 +24,7 @@ export default function Statement({ statement }: Props) {
       <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,215,0,.35),transparent)]" />
 
       <div className="relative mx-auto flex max-w-[920px] flex-col items-center gap-8 text-center">
-        <span className="font-mono text-sm tracking-[.45em] text-primary">
+        <span className="font-mono text-base tracking-[.45em] text-primary">
           {statement.kicker}
         </span>
         <h2 className="text-[clamp(30px,4.5vw,56px)] font-semibold leading-[1.35] tracking-[.02em] text-foreground [text-shadow:3px_0_0_rgba(108,52,131,.55),-3px_0_0_rgba(255,215,0,.18)] [text-wrap:balance] whitespace-pre-line">

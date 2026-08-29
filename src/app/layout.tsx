@@ -21,7 +21,7 @@ const qwigley = Qwigley({
 export const metadata: Metadata = {
   title: "FlexQ — YOUR MUSIC. YOUR WORDS.",
   description:
-    "FlexQ は、シンガー・ラッパー・ミュージシャンのためのリリック制作アプリです。",
+    "FlexQは、シンガー・ラッパー・クリエイターのための音楽制作サポートアプリです。",
 };
 
 export default function RootLayout({

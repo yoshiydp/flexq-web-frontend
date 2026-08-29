@@ -20,4 +20,11 @@ describe("SectionHeader", () => {
       "/news",
     );
   });
+
+  it("align=center 指定時は見出しを中央寄せにする", () => {
+    render(<SectionHeader title="3 CORE FEATURES" align="center" />);
+    expect(
+      screen.getByRole("heading", { name: "3 CORE FEATURES" }),
+    ).toHaveClass("text-center");
+  });
 });

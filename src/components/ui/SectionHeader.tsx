@@ -7,7 +7,7 @@ type Props = {
   viewAllHref?: string;
   /** center 指定時は見出しを中央に置き、左右に罫線を伸ばす（VIEW ALL は非表示） */
   align?: "left" | "center";
-  /** lg 指定時は見出しを一回り大きく（18px）表示 */
+  /** lg 指定時は見出しを一回り大きく表示（md 以上 18px / SP 14px） */
   size?: "md" | "lg";
 };
 
@@ -35,7 +35,8 @@ export default function SectionHeader({
       <h3
         className={cn(
           "font-mono tracking-[.45em] text-primary",
-          size === "lg" ? "text-lg" : "text-sm",
+          // lg は SP では 2 段小さく（14px）、md 以上で 18px
+          size === "lg" ? "text-sm md:text-lg" : "text-sm",
           centered && "text-center",
         )}
       >

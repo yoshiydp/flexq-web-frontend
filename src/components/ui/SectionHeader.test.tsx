@@ -33,6 +33,8 @@ describe("SectionHeader", () => {
     expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass("text-sm");
 
     rerender(<SectionHeader title="FAQ" size="lg" />);
-    expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass("text-lg");
+    expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass(
+      "md:text-lg",
+    );
   });
 });

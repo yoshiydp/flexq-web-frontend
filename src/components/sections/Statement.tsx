@@ -24,13 +24,21 @@ export default function Statement({ statement }: Props) {
       <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,215,0,.35),transparent)]" />
 
       <div className="relative mx-auto flex max-w-[920px] flex-col items-center gap-8 text-center">
-        <span className="font-mono text-xs tracking-[.45em] text-primary">
+        <span className="font-mono text-xs tracking-[.45em] text-primary md:text-sm">
           {statement.kicker}
         </span>
-        <h2 className="text-[clamp(30px,4.5vw,56px)] font-semibold leading-[1.35] tracking-[.02em] text-foreground [text-shadow:3px_0_0_rgba(108,52,131,.55),-3px_0_0_rgba(255,215,0,.18)] [text-wrap:balance] whitespace-pre-line">
-          {statement.heading}
+        {/*
+          見出しの \n は SP 向けの折り返し位置。各行を inline-block にすることで、
+          幅が足りる PC では 1 行に並び、SP では \n の位置で折り返す。
+        */}
+        <h2 className="text-[clamp(30px,4.5vw,56px)] font-semibold leading-[1.35] tracking-[.02em] text-foreground [text-shadow:3px_0_0_rgba(108,52,131,.55),-3px_0_0_rgba(255,215,0,.18)]">
+          {statement.heading.split("\n").map((line, i) => (
+            <span key={i} className="inline-block">
+              {line}
+            </span>
+          ))}
         </h2>
-        <p className="max-w-[640px] text-[17px] leading-8 text-secondary-foreground [text-wrap:pretty]">
+        <p className="max-w-[740px] text-[17px] leading-8 text-secondary-foreground [text-wrap:pretty] whitespace-pre-line">
           {statement.body}
         </p>
       </div>

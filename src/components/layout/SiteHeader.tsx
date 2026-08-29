@@ -46,14 +46,14 @@ export default function SiteHeader({ links, appStoreUrl, googlePlayUrl }: Props)
             <a
               key={link.href}
               href={link.href}
-              className="font-mono text-sm tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+              className="link-underline font-mono text-sm tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
             >
               {link.label}
             </a>
           ))}
           <a
             href={DOWNLOAD_ANCHOR}
-            className="rounded-full bg-primary px-7 py-3 font-mono text-sm font-medium tracking-[.2em] text-primary-foreground transition-colors hover:bg-[#FFE44D]"
+            className="btn-sheen rounded-full bg-primary px-7 py-3 font-mono text-sm font-medium tracking-[.2em] text-primary-foreground shadow-[0_0_0_rgba(255,215,0,0)] transition-[background-color,box-shadow,transform,translate] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 hover:bg-[#FFE44D] hover:shadow-[0_0_28px_rgba(255,215,0,.45)] active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0"
           >
             DOWNLOAD
           </a>
@@ -63,7 +63,7 @@ export default function SiteHeader({ links, appStoreUrl, googlePlayUrl }: Props)
         <div className="ml-auto flex items-center gap-3 md:hidden">
           <a
             href={DOWNLOAD_ANCHOR}
-            className="inline-flex items-center whitespace-nowrap rounded-full bg-primary px-[18px] py-3 font-mono text-[11px] font-medium tracking-[.2em] text-primary-foreground transition-colors hover:bg-[#FFE44D]"
+            className="btn-sheen inline-flex items-center whitespace-nowrap rounded-full bg-primary px-[18px] py-3 font-mono text-[11px] font-medium tracking-[.2em] text-primary-foreground transition-[background-color,box-shadow] duration-300 hover:bg-[#FFE44D] hover:shadow-[0_0_24px_rgba(255,215,0,.45)]"
           >
             DOWNLOAD
           </a>

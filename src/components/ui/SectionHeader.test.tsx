@@ -20,4 +20,21 @@ describe("SectionHeader", () => {
       "/news",
     );
   });
+
+  it("align=center 指定時は見出しを中央寄せにする", () => {
+    render(<SectionHeader title="3 CORE FEATURES" align="center" />);
+    expect(
+      screen.getByRole("heading", { name: "3 CORE FEATURES" }),
+    ).toHaveClass("text-center");
+  });
+
+  it("size=lg 指定時は見出しを一回り大きくする", () => {
+    const { rerender } = render(<SectionHeader title="FAQ" />);
+    expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass("text-sm");
+
+    rerender(<SectionHeader title="FAQ" size="lg" />);
+    expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass(
+      "md:text-lg",
+    );
+  });
 });

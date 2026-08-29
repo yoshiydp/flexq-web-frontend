@@ -17,7 +17,7 @@ export default function Features({ heading, features }: Props) {
       <SectionBackground src="/bg-features.png" darkOverlay />
 
       <div className="relative mx-auto flex max-w-[1180px] flex-col gap-16">
-        <SectionHeader title={heading} align="center" />
+        <SectionHeader title={heading} align="center" size="lg" />
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-7">
           {features.map((feature) => (

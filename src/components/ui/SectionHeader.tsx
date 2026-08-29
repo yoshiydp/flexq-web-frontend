@@ -7,6 +7,8 @@ type Props = {
   viewAllHref?: string;
   /** center 指定時は見出しを中央に置き、左右に罫線を伸ばす（VIEW ALL は非表示） */
   align?: "left" | "center";
+  /** lg 指定時は見出しを一回り大きく（16px）表示 */
+  size?: "md" | "lg";
 };
 
 /**
@@ -17,6 +19,7 @@ export default function SectionHeader({
   title,
   viewAllHref,
   align = "left",
+  size = "md",
 }: Props) {
   const centered = align === "center";
 
@@ -25,7 +28,8 @@ export default function SectionHeader({
       {centered && <span className="block h-px flex-1 bg-border" />}
       <h3
         className={cn(
-          "font-mono text-sm tracking-[.45em] text-primary",
+          "font-mono tracking-[.45em] text-primary",
+          size === "lg" ? "text-base" : "text-sm",
           centered && "text-center",
         )}
       >

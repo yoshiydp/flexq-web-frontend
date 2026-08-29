@@ -10,7 +10,7 @@ export const topPageFallback: TopPageContent = {
   heroTagline: "Your Music. Your Words.",
 
   statement: {
-    kicker: "WRITE / RECORD / PLAY",
+    kicker: "CUE / REC / WRITE",
     heading: "一瞬で名曲を生み出すために",
     body: "FlexQは、シンガー・ラッパー・クリエイターのための音楽制作サポートアプリです。音源の好きな位置から何度でもすぐに再生できる「CUE機能」で、作詞・歌詞制作をよりスムーズに。さらに「REC機能」を使えば、思いついたフレーズや歌声をその場ですぐに録音し、簡単に共有できます。聴く、書く、録る、共有する。FlexQが、あなたの音楽制作をもっと自由に、もっとスピーディーにします。",
   },

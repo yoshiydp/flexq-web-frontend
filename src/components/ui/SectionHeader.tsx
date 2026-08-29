@@ -13,7 +13,7 @@ type Props = {
 
 /**
  * セクション見出しの共通パターン:
- * mono 14px / tracking .45em / gold + 右へ伸びる 1px の罫線。
+ * mono 14px / tracking .45em / gold + 右へ伸びる 1px の罫線（テキストの上下中央に配置）。
  */
 export default function SectionHeader({
   title,
@@ -24,13 +24,8 @@ export default function SectionHeader({
   const centered = align === "center";
 
   return (
-    <div
-      className={cn(
-        "flex gap-6",
-        // 中央寄せ時は左右の罫線をテキストの上下中央に揃える
-        centered ? "items-center" : "items-baseline",
-      )}
-    >
+    <div className="flex items-center gap-6">
+      {/* 罫線（と VIEW ALL）はテキストの上下中央に揃える */}
       {centered && <span className="block h-px flex-1 bg-border" />}
       <h3
         className={cn(

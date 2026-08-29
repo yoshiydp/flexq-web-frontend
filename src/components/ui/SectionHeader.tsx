@@ -24,7 +24,13 @@ export default function SectionHeader({
   const centered = align === "center";
 
   return (
-    <div className="flex items-baseline gap-6">
+    <div
+      className={cn(
+        "flex gap-6",
+        // 中央寄せ時は左右の罫線をテキストの上下中央に揃える
+        centered ? "items-center" : "items-baseline",
+      )}
+    >
       {centered && <span className="block h-px flex-1 bg-border" />}
       <h3
         className={cn(

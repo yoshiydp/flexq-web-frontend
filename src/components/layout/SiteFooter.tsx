@@ -18,7 +18,7 @@ export default function SiteFooter({ links }: Props) {
               <a
                 key={link.href}
                 href={link.href}
-                className="font-mono text-[11px] tracking-[.25em] text-muted-foreground transition-colors hover:text-primary"
+                className="link-underline font-mono text-[11px] tracking-[.25em] text-muted-foreground transition-colors hover:text-primary"
               >
                 {link.label}
               </a>
@@ -31,7 +31,7 @@ export default function SiteFooter({ links }: Props) {
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-mono text-[11px] tracking-[.25em] text-muted-foreground transition-colors hover:text-primary"
+                className="link-underline font-mono text-[11px] tracking-[.25em] text-muted-foreground transition-colors hover:text-primary"
               >
                 {link.label}
               </Link>

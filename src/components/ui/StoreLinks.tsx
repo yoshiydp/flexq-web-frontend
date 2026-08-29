@@ -3,13 +3,13 @@ import { DOWNLOAD_ANCHOR } from "@/components/layout/navLinks";
 import { cn } from "@/lib/utils";
 
 const storeButton = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full text-[15px] font-semibold tracking-[.05em] no-underline transition-colors",
+  "group btn-sheen inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full text-[15px] font-semibold tracking-[.05em] no-underline transition-[background-color,box-shadow,transform,translate,border-color] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0",
   {
     variants: {
       variant: {
-        gold: "bg-primary text-primary-foreground shadow-[0_0_30px_rgba(255,215,0,.3)] hover:bg-[#FFE44D]",
+        gold: "bg-primary text-primary-foreground shadow-[0_0_30px_rgba(255,215,0,.3)] hover:bg-[#FFE44D] hover:shadow-[0_0_48px_rgba(255,215,0,.55)] active:shadow-[0_0_24px_rgba(255,215,0,.4)]",
         outline:
-          "border border-primary bg-transparent text-primary hover:bg-primary/10",
+          "border border-primary bg-transparent text-primary [--sheen-color:rgba(255,215,0,.28)] hover:bg-primary/10 hover:shadow-[0_0_32px_rgba(255,215,0,.22)]",
       },
       size: {
         // SP では縦積み full width、sm 以上で min-width 260px の横並びに切り替わる
@@ -38,7 +38,7 @@ function StoreButton({ platform, store, href, variant, size }: StoreButtonProps)
       {...(resolvedHref ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={storeButton({ variant, size })}
     >
-      <span className="font-mono text-[11px] tracking-[.2em] opacity-70">
+      <span className="font-mono text-[11px] tracking-[.2em] opacity-70 transition-opacity duration-300 group-hover:opacity-100">
         {platform}
       </span>
       {store}

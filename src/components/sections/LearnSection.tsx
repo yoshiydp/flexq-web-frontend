@@ -23,7 +23,7 @@ function ListHeader({ title, subtitle, viewAllHref }: ListHeaderProps) {
       </div>
       <Link
         href={viewAllHref}
-        className="whitespace-nowrap font-mono text-[11px] tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+        className="link-underline whitespace-nowrap font-mono text-[11px] tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
       >
         VIEW&nbsp;ALL&nbsp;→
       </Link>

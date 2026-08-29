@@ -74,7 +74,7 @@ export default function LegalDocument({ lead, sections, enactedDate }: Props) {
       <footer className="border-t border-border pt-8">
         <Link
           href="/"
-          className="font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+          className="link-underline font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
         >
           ← トップへ戻る
         </Link>

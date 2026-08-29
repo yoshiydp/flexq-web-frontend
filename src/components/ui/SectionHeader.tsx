@@ -41,7 +41,7 @@ export default function SectionHeader({
       {!centered && viewAllHref && (
         <Link
           href={viewAllHref}
-          className="font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+          className="link-underline font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
         >
           VIEW&nbsp;ALL&nbsp;→
         </Link>

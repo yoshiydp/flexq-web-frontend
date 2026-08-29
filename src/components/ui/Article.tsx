@@ -67,7 +67,7 @@ export default function Article({ article, backHref, backLabel }: Props) {
       <footer className="border-t border-border pt-8">
         <Link
           href={backHref}
-          className="font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+          className="link-underline font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
         >
           ← {backLabel}
         </Link>

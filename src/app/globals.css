@@ -126,6 +126,68 @@
   }
 }
 
+/*
+ * ホバー演出（FlexQ のヒーロー由来: 波形を走る再生ヘッド / ゴールドの発光）
+ *
+ * btn-sheen     … ピルボタン用。ゴールドの光の帯が左 → 右へ一度走る（--sheen-color で色を変更可）
+ * link-underline… テキストリンク用。ゴールドの下線が左から伸びる
+ * いずれも prefers-reduced-motion では動きを止め、色変化のみ残す
+ */
+@utility btn-sheen {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --sheen-color: rgba(255, 255, 255, 0.45);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 32%,
+      var(--sheen-color) 50%,
+      transparent 68%
+    );
+    transform: translateX(-100%);
+  }
+  &:hover::after {
+    transform: translateX(100%);
+    /* 帯が一瞬で通過しないよう、緩やかなイーズインアウトで約 0.9 秒かけて走らせる */
+    transition: transform 0.9s cubic-bezier(0.45, 0.05, 0.25, 1);
+  }
+}
+
+@utility link-underline {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  &:hover::after {
+    transform: scaleX(1);
+  }
+}
+
+/* @utility 内にネストした @media はコンパイル時にクエリが落ちるため、外に出して定義する */
+@media (prefers-reduced-motion: reduce) {
+  .btn-sheen::after {
+    display: none;
+  }
+  .link-underline::after {
+    transition: none;
+  }
+}
+
 /* SP カルーセルのスクロールバー非表示 */
 @utility scrollbar-hide {
   scrollbar-width: none;

@@ -6,7 +6,7 @@ export default function NewsCard({ item }: { item: NewsItem }) {
   return (
     <Link
       href={item.href}
-      className="flex flex-col overflow-hidden rounded-lg border border-border bg-card no-underline transition-colors hover:border-primary"
+      className="flex flex-col overflow-hidden rounded-lg border border-border bg-card no-underline transition-[border-color,box-shadow,transform] duration-300 ease-out hover:-translate-y-1 hover:border-primary hover:shadow-[0_0_36px_rgba(255,215,0,.12)] motion-reduce:transition-colors motion-reduce:hover:translate-y-0"
     >
       <div className="aspect-video bg-muted">
         {item.thumbnailUrl && (

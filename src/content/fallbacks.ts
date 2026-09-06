@@ -38,10 +38,33 @@ export const topPageFallback: TopPageContent = {
   ],
 
   previewHeading: "APP PREVIEW",
+  // 画面収録は iOS シミュレーター（iPhone 17 Pro / 402x874）で撮ったものを
+  // 750x1630 に縮小して public/preview/ に置いている。撮り直しの手順は README を参照
   screens: [
-    { caption: "PROJECT LIST", imageUrl: null, highlighted: false },
-    { caption: "LYRIC EDITOR", imageUrl: null, highlighted: true },
-    { caption: "VOICE MEMO", imageUrl: null, highlighted: false },
+    {
+      caption: "PROJECT LIST",
+      imageUrl: "/preview/project-list-poster.jpg",
+      videoBasePath: "/preview/project-list",
+      highlighted: false,
+    },
+    {
+      caption: "PROJECT EDITOR",
+      imageUrl: "/preview/project-editor-poster.jpg",
+      videoBasePath: "/preview/project-editor",
+      highlighted: true,
+    },
+    {
+      caption: "TRACK LIST",
+      imageUrl: "/preview/track-list-poster.jpg",
+      videoBasePath: "/preview/track-list",
+      highlighted: false,
+    },
+    {
+      caption: "QUICK RECORD",
+      imageUrl: "/preview/quick-record-poster.jpg",
+      videoBasePath: "/preview/quick-record",
+      highlighted: false,
+    },
   ],
 
   newsHeading: "NEWS",

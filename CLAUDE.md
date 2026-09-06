@@ -161,6 +161,7 @@ lyrics-web-frontend/
 | `src/lib/metadata.ts` | サブページ共通の metadata を組み立てる `pageMetadata()` |
 | `src/app/layout.tsx` | サイト全体の既定値（title テンプレート・OG・Twitter・robots・theme-color） |
 | `src/app/robots.ts` | `/robots.txt` |
+| `src/app/sitemap.ts` | `/sitemap.xml`（`IS_INDEXABLE` が false の間は空で返す） |
 | `src/components/seo/StructuredData.tsx` | トップページの JSON-LD（Organization / WebSite / MobileApplication） |
 | `public/og.png` | OG 画像（1200x630） |
 
@@ -176,12 +177,13 @@ lyrics-web-frontend/
 
 ### 公開時にやること
 
-1. 独自ドメインを取得したら Vercel の環境変数 `NEXT_PUBLIC_SITE_URL` を設定する
-   （未設定時は `https://flexq-web-frontend.vercel.app` にフォールバックする）
-2. `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする
-   → noindex が外れ、`/robots.txt` が `Allow: /` になる。
+1. `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする
+   → noindex が外れ、`/robots.txt` が `Allow: /` + `Sitemap:` になり、`/sitemap.xml` に URL が並ぶ。
    Preview デプロイ（feature / staging）は `VERCEL_ENV` の判定により公開後も noindex のまま
-3. `src/app/sitemap.ts` を追加する（現在は noindex のため未作成）
+2. Google Search Console に `flexqstudio.com` を登録し、`/sitemap.xml` を送信する
+
+> 独自ドメインの設定（Vercel へのドメイン追加・DNS・`NEXT_PUBLIC_SITE_URL`）は 2026-09-06 に完了済み。
+> **`ALLOW_INDEXING` を戻し忘れると、公開しても検索結果に一切出ない**ため、リリース手順に必ず含めること。
 
 ---
 
@@ -482,17 +484,33 @@ gh pr create --base master --head staging
 | 項目 | 値 |
 |------|---|
 | プロジェクト名 | `flexq-web`（FlexQ Web チーム。旧 `lyrics-web-frontend` から 2026-08-15 リネーム） |
-| 本番 URL | https://flexq-web-frontend.vercel.app |
-| 旧 URL | `lyrics-web-frontend.vercel.app`（新 URL へ 307 リダイレクト） |
+| 本番 URL | https://flexqstudio.com （`www` も同じ内容を配信） |
+| 予備 URL | `flexq-web-frontend.vercel.app`（確認用として並存） |
+| 旧 URL | `lyrics-web-frontend.vercel.app`（`flexq-web-frontend.vercel.app` へ 307 リダイレクト） |
 | ダッシュボード | Vercel「FlexQ Web」チーム内の `flexq-web` プロジェクト |
 
-> 本番用の独自ドメイン（外部レジストラで取得予定）は未設定。追加したら本番 URL をそちらに更新し、`flexq-web-frontend.vercel.app` はテスト・確認用として並存させる。
+### 独自ドメイン（flexqstudio.com）
+
+2026-09-06 に設定完了。レジストラはお名前.com、**DNS とメールは ConoHa WING に残したまま**、A レコードだけ Vercel に向けている。
+
+| レコード | 値 | 用途 |
+|---------|---|------|
+| `A @` / `A www` | `76.76.21.21` | Vercel（サイト配信） |
+| `MX @` | `mail1061.conoha.ne.jp` | `contact@flexqstudio.com` の受信 |
+| `TXT @` / `TXT default._domainkey` | SPF / DKIM | メール認証 |
+| `A mail` / `A ml-cp` | `157.120.209.174` | ConoHa のメール関連 |
+| `NS @` | `ns-a1/a2/a3.conoha.io` | DNS |
+
+> **ConoHa の契約は解約しないこと。** サイト配信は Vercel に移ったが、`contact@flexqstudio.com` は
+> ConoHa のメールサーバーで動いており、Vercel にメール機能はない。ネームサーバーも ConoHa のため、
+> 解約するにはメールと DNS の移行が先に必要になる。
+> ConoHa 側の `public_html/flexqstudio.com/` は空（`error/` のみ）で、DNS 経由では到達しない。
 
 ### 自動デプロイ（GitHub 連携済み）
 
 | ブランチ | デプロイ先 | URL |
 |---------|-----------|-----|
-| `master` | Production | https://flexq-web-frontend.vercel.app |
+| `master` | Production | https://flexqstudio.com |
 | `staging` | Preview | `flexq-web-git-staging-*.vercel.app`（固定・正確な URL はダッシュボード参照） |
 | `feature/*` 等 | Preview | ブランチごとに URL が自動発行 |
 
@@ -554,6 +572,6 @@ Strapi Cloud が基本有料のため、**本番 CMS の接続は当面見送り
 
 **CMS を復活させる手順**（判断が下りたらこれだけで戻せる）:
 1. Strapi をホスティング（Strapi Cloud なら `lyrics-web-strapi` の master を接続。bootstrap が権限付与・初期データ投入を自動実行する）
-2. ホスティング側の env に `FRONTEND_URLS=https://flexq-web-frontend.vercel.app` を設定（CORS）
+2. ホスティング側の env に `FRONTEND_URLS=https://flexqstudio.com` を設定（CORS）
 3. Vercel の Production 環境変数 `NEXT_PUBLIC_STRAPI_URL` に CMS の URL を設定 → **Redeploy**
 4. 管理画面で本番コンテンツ（記事・CTA のストア URL・アプリスクリーンショット）を投入 → ISR（60 秒）で反映

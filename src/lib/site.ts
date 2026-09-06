@@ -8,11 +8,13 @@
  * サイトの正規 URL（末尾スラッシュなし）。
  * canonical / OG / 構造化データの絶対 URL の基準になる。
  *
- * 独自ドメイン（取得予定）へ切り替えるときは、Vercel の環境変数
- * `NEXT_PUBLIC_SITE_URL` を設定するだけでよい。
+ * Production では Vercel の環境変数 `NEXT_PUBLIC_SITE_URL` が同じ値を指す。
+ * 既定値を独自ドメインにしてあるのは、環境変数が未設定の Preview / ローカルでも
+ * 正しいドメインで組み立てるため（Preview は noindex なので実害はないが、
+ * 目視確認時に旧ドメインが出て混乱するのを避ける）。
  */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://flexq-web-frontend.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://flexqstudio.com"
 ).replace(/\/+$/, "");
 
 export const SITE_NAME = "FlexQ";

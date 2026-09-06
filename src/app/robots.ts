@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { IS_INDEXABLE, SITE_URL } from "@/lib/site";
+import { absoluteUrl, IS_INDEXABLE, SITE_URL } from "@/lib/site";
 
 /**
  * /robots.txt を生成する。
@@ -13,6 +13,7 @@ export default function robots(): MetadataRoute.Robots {
 
   return {
     rules: [{ userAgent: "*", allow: "/" }],
+    sitemap: absoluteUrl("/sitemap.xml"),
     host: SITE_URL,
   };
 }

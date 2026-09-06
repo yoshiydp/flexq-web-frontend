@@ -1,5 +1,7 @@
 import { cva } from "class-variance-authority";
+import type { ReactNode } from "react";
 import { DOWNLOAD_ANCHOR } from "@/components/layout/navLinks";
+import { AppleIcon, GooglePlayIcon } from "@/components/ui/StoreIcons";
 import { cn } from "@/lib/utils";
 
 const storeButton = cva(
@@ -22,14 +24,15 @@ const storeButton = cva(
 );
 
 type StoreButtonProps = {
-  platform: string;
+  /** プラットフォームのブランドアイコン。色はラベルと揃える（currentColor） */
+  icon: ReactNode;
   store: string;
   href: string | null;
   variant: "gold" | "outline";
   size?: "default" | "full";
 };
 
-function StoreButton({ platform, store, href, variant, size }: StoreButtonProps) {
+function StoreButton({ icon, store, href, variant, size }: StoreButtonProps) {
   // CMS の未入力は "" で届くことがあるため、空白のみの値もフォールバック扱いにする
   const resolvedHref = href?.trim() ? href : null;
   return (
@@ -38,9 +41,7 @@ function StoreButton({ platform, store, href, variant, size }: StoreButtonProps)
       {...(resolvedHref ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={storeButton({ variant, size })}
     >
-      <span className="font-mono text-[11px] tracking-[.2em] opacity-70 transition-opacity duration-300 group-hover:opacity-100">
-        {platform}
-      </span>
+      {icon}
       {store}
     </a>
   );
@@ -61,7 +62,7 @@ type Props = {
 
 /**
  * App Store / Google Play のストアボタンペア。
- * ラベル（iPhone / App Store / Android / Google Play）は固定実装、URL は CMS から供給。
+ * ラベル（App Store / Google Play）とアイコンは固定実装、URL は CMS から供給。
  */
 export default function StoreLinks({
   appStoreUrl,
@@ -84,14 +85,14 @@ export default function StoreLinks({
       )}
     >
       <StoreButton
-        platform="iPhone"
+        icon={<AppleIcon className="size-[18px] -translate-y-px" />}
         store="App Store"
         href={appStoreUrl}
         variant={appStoreVariant}
         size={size}
       />
       <StoreButton
-        platform="Android"
+        icon={<GooglePlayIcon className="size-4" />}
         store="Google Play"
         href={googlePlayUrl}
         variant={googlePlayVariant}

@@ -41,6 +41,13 @@ export default function SiteFooter({ links }: Props) {
             © {new Date().getFullYear()} FlexQ
           </span>
         </div>
+        {/* 公式ストアバッジを掲載する際に required な商標表記
+            （Apple: Apple Inc. の商標である旨 / Google: Google LLC の商標である旨） */}
+        <p className="text-[10px] leading-[1.8] text-muted-foreground/70">
+          Apple、Apple ロゴ、App Store は、米国および他の国々で登録された Apple Inc.
+          の商標です。Google Play および Google Play ロゴは Google LLC
+          の商標です。
+        </p>
       </div>
     </footer>
   );

@@ -6,15 +6,13 @@ import type { CtaContent } from "@/types/content";
 type Props = {
   tagline: string;
   cta: CtaContent;
-  /** ストアボタンのバリアント（既定: gold 塗り × 2） */
-  variant?: "gold" | "outline";
 };
 
 /**
  * ダウンロード CTA。黒 → 暗紫へ回帰するグラデで
  * サイト全体の「暗紫 → 黒 → 暗紫」サンドイッチ構造を閉じる。
  */
-export default function CtaSection({ tagline, cta, variant = "gold" }: Props) {
+export default function CtaSection({ tagline, cta }: Props) {
   return (
     <section
       id="download"
@@ -38,7 +36,6 @@ export default function CtaSection({ tagline, cta, variant = "gold" }: Props) {
         <StoreLinks
           appStoreUrl={cta.appStoreUrl}
           googlePlayUrl={cta.googlePlayUrl}
-          variant={variant}
           className="mt-2"
         />
       </div>

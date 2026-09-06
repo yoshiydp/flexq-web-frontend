@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import SubPageShell from "@/components/layout/SubPageShell";
 import TutorialRow from "@/components/ui/TutorialRow";
 import { getAllTutorialItems } from "@/lib/content";
+import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "TUTORIAL | FlexQ",
-  description: "FlexQ の使い方を、順番に学べるチュートリアル一覧です。",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "TUTORIAL",
+  description:
+    "FlexQ の使い方を、順番に学べるチュートリアル一覧です。",
+  path: "/tutorials",
+});
 
 export default async function TutorialsIndexPage() {
   const tutorials = await getAllTutorialItems();

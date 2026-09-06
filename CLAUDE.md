@@ -440,12 +440,12 @@ master
         └── feature/xxx   # 作業ブランチ
 ```
 
-| ブランチ | 役割 |
-|---------|------|
-| `master` | 本番リリース用。staging で確認済みのものをマージ |
-| `staging` | 表示・挙動確認用。develop から適宜マージして使用 |
-| `develop` | 開発ベースブランチ。feature ブランチの統合先 |
-| `feature/*` | 機能ごとの作業ブランチ |
+| ブランチ | 役割 | マージ方法 |
+|---------|------|-----------|
+| `master` | 本番リリース用。staging で確認済みのものをマージ | **PR 必須**（`staging` → `master`） |
+| `staging` | 表示・挙動確認用。develop から適宜マージして使用 | 直接マージ |
+| `develop` | 開発ベースブランチ。feature ブランチの統合先 | **PR 必須**（`feature/*` → `develop`） |
+| `feature/*` | 機能ごとの作業ブランチ | — |
 
 > `staging` は `develop` と常に一致するわけではありません。確認したいタイミングで `develop` → `staging` へマージします。
 
@@ -460,16 +460,18 @@ git checkout -b feature/xxx
 
 # 3. develop へ PR を作成してマージ
 
-# 4. staging で確認したいとき → develop を staging へマージ
+# 4. staging で確認したいとき → develop を staging へ直接マージ（PR は不要）
 git checkout staging
 git merge develop
 git push origin staging   # Vercel に自動デプロイ → 確認用 URL で確認
 
-# 5. 本番リリース → staging を master へマージ
-git checkout master
-git merge staging
-git push origin master    # Vercel に本番デプロイ
+# 5. 本番リリース → staging から master へ PR を作成してマージ
+gh pr create --base master --head staging
 ```
+
+> **本番リリース（`staging` → `master`）は必ず PR を経由すること。**
+> 差し戻しのコストが高く、Preview URL と差分をレビューしてからマージしたいため、
+> ここだけは直接マージ + push をしない（`develop` → `staging` は従来どおり直接マージでよい）。
 
 ---
 

@@ -9,7 +9,10 @@ const STRAPI_URL =
 
 const STRAPI_API_TOKEN = process.env.STRAPI_API_TOKEN;
 
-type StrapiListResponse<T> = { data: T[] };
+type StrapiListResponse<T> = {
+  data: T[];
+  meta?: { pagination?: { pageCount?: number } };
+};
 type StrapiSingleResponse<T> = { data: T | null };
 
 export type StrapiMedia = {
@@ -41,6 +44,43 @@ async function strapiFetch<T>(
 export async function fetchCollection<T>(path: string): Promise<T[]> {
   const json = await strapiFetch<StrapiListResponse<T>>(path);
   return json?.data ?? [];
+}
+
+/** 全ページ走査時の 1 リクエストあたりの件数 */
+const ALL_PAGES_PAGE_SIZE = 100;
+
+/**
+ * 暴走防止の上限（= 5,000 件）。sitemap.xml の仕様上限は 50,000 URL なので、
+ * これを超える規模になったら sitemap の分割とあわせて見直す。
+ */
+const ALL_PAGES_MAX_REQUESTS = 50;
+
+/**
+ * コレクションを全ページ辿って取得する。失敗時はそこまでの取得ぶんを返す。
+ *
+ * 一覧ページ用の `fetchCollection` は表示件数で打ち切るが、sitemap は
+ * 公開済み URL を 1 つでも落とすと検索エンジンに拾われないため、こちらを使う。
+ * `path` にページネーションのパラメータを含めないこと（ここで付与する）。
+ */
+export async function fetchCollectionAllPages<T>(path: string): Promise<T[]> {
+  const separator = path.includes("?") ? "&" : "?";
+  const items: T[] = [];
+
+  for (let page = 1; page <= ALL_PAGES_MAX_REQUESTS; page += 1) {
+    const json = await strapiFetch<StrapiListResponse<T>>(
+      `${path}${separator}pagination[page]=${page}&pagination[pageSize]=${ALL_PAGES_PAGE_SIZE}`,
+    );
+    // CMS 障害時は握りつぶさず打ち切る（部分的な sitemap の方が空より害が小さい）
+    if (!json) break;
+
+    items.push(...(json.data ?? []));
+
+    // pageCount が返らない場合は 1 ページで完結したものとみなす
+    const pageCount = json.meta?.pagination?.pageCount ?? page;
+    if (page >= pageCount) break;
+  }
+
+  return items;
 }
 
 /**

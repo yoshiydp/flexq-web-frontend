@@ -2,6 +2,7 @@ import { topPageFallback } from "@/content/fallbacks";
 import { routes } from "@/lib/routes";
 import {
   fetchCollection,
+  fetchCollectionAllPages,
   fetchCollectionOrThrow,
   fetchSingle,
   strapiMediaUrl,
@@ -218,6 +219,33 @@ export function getAllTutorialItems(): Promise<TutorialItem[]> {
 
 export function getAllColumnItems(): Promise<ColumnItem[]> {
   return getColumnItems(LIST_PAGE_SIZE);
+}
+
+/**
+ * sitemap 用に、公開済み記事のパスを**全件**返す。
+ *
+ * 一覧ページ用の `getAll*Items()` は `LIST_PAGE_SIZE` で打ち切るため流用できない。
+ * 記事が上限を超えると、詳細ページは到達可能なのに sitemap から消えてしまう。
+ * slug だけあればよいので `fields` で絞って取得する。
+ */
+export async function getAllArticlePaths(): Promise<string[]> {
+  type SlugOnly = { slug: string };
+
+  const [news, tutorials, columns] = await Promise.all([
+    fetchCollectionAllPages<SlugOnly>(
+      "/news-articles?fields[0]=slug&sort=publishedAt:desc",
+    ),
+    fetchCollectionAllPages<SlugOnly>("/tutorials?fields[0]=slug&sort=order:asc"),
+    fetchCollectionAllPages<SlugOnly>(
+      "/columns?fields[0]=slug&sort=publishedAt:desc",
+    ),
+  ]);
+
+  return [
+    ...news.map((a) => routes.newsArticle(a.slug)),
+    ...tutorials.map((a) => routes.tutorial(a.slug)),
+    ...columns.map((a) => routes.column(a.slug)),
+  ];
 }
 
 function toArticleDetail(article: StrapiTutorial): ArticleDetail {

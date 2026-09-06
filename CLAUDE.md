@@ -462,18 +462,31 @@ git checkout -b feature/xxx
 
 # 3. develop へ PR を作成してマージ
 
-# 4. staging で確認したいとき → develop を staging へ直接マージ（PR は不要）
+# 4. develop を staging へ直接マージ（PR は不要）
 git checkout staging
 git merge develop
-git push origin staging   # Vercel に自動デプロイ → 確認用 URL で確認
+git push origin staging   # Vercel が Preview を自動ビルド
 
-# 5. 本番リリース → staging から master へ PR を作成してマージ
+# 5. staging の Preview URL を開いて内容を目視確認 ★ここを飛ばさない
+vercel ls flexq-web | head -10   # state が READY のものを開く
+
+# 6. 本番リリース → staging から master へ PR を作成してマージ
 gh pr create --base master --head staging
+
+# 7. 本番 URL で反映結果を確認
+curl -s -o /dev/null -w "%{http_code}\n" https://flexqstudio.com/
 ```
 
-> **本番リリース（`staging` → `master`）は必ず PR を経由すること。**
-> 差し戻しのコストが高く、Preview URL と差分をレビューしてからマージしたいため、
-> ここだけは直接マージ + push をしない（`develop` → `staging` は従来どおり直接マージでよい）。
+> **`master` へマージする前に、必ず `staging` の Preview で内容を確認すること。**
+> 本番は独自ドメインで一般に到達できる状態であり、`master` へのマージは即座に反映される。
+> 差し戻しのコストが高いため、Preview の目視確認と PR の差分レビューを通してからマージする
+> （`develop` → `staging` は従来どおり直接マージでよい）。
+>
+> Preview は Vercel Authentication で保護されており、匿名アクセスは 302 で SSO に飛ぶ。
+> ログイン済みのブラウザからは閲覧できるが、`curl` での自動確認はできない。
+> meta タグや robots.txt を機械的に確認したい場合は、ローカルで `yarn build && yarn start` する。
+>
+> 確認観点とトラブルシューティングは `docs/custom-domain-and-release.md` を参照。
 
 ---
 
@@ -505,6 +518,9 @@ gh pr create --base master --head staging
 > ConoHa のメールサーバーで動いており、Vercel にメール機能はない。ネームサーバーも ConoHa のため、
 > 解約するにはメールと DNS の移行が先に必要になる。
 > ConoHa 側の `public_html/flexqstudio.com/` は空（`error/` のみ）で、DNS 経由では到達しない。
+
+移行の経緯・DNS の変更手順・公開前チェックリスト・トラブルシューティングは
+**`docs/custom-domain-and-release.md`** にまとめてある。
 
 ### 自動デプロイ（GitHub 連携済み）
 

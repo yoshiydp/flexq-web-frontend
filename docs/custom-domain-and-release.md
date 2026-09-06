@@ -61,15 +61,31 @@ feature/* ──PR──▶ develop ──直接マージ──▶ staging ─�
 7. 本番 URL で反映結果を確認
 ```
 
-**Preview URL の調べ方**
+**確認する環境と URL**
 
-Vercel ダッシュボードの Deployments でブランチ `staging` の最新デプロイを開く。
-CLI でも取得できる。
+`master` へマージする前の確認は、**`staging` ブランチの Preview 環境**で行う。
+
+| ブランチ | Vercel 環境 | URL |
+|---------|------------|-----|
+| `feature/*` | Preview | デプロイごとに自動発行（実装中の確認用） |
+| `staging` | Preview | **`https://flexq-web-git-staging-flexq-web.vercel.app`** ← ここで確認する |
+| `master` | Production | `https://flexqstudio.com` |
+
+`flexq-web-git-staging-flexq-web.vercel.app` はブランチ固定のエイリアスで、
+**`staging` に push するたびに最新のデプロイへ自動で貼り替わる**。URL は変わらないので
+ブックマークしてよい。デプロイごとの一意な URL（`flexq-xxxxxxxxx-flexq-web.vercel.app`）も
+併存するが、毎回変わるため日常の確認には固定エイリアスを使う。
+
+ビルドの完了状況は Vercel ダッシュボードの Deployments、または CLI で確認できる。
 
 ```bash
-# staging の最新デプロイを確認（state が READY になってから開く）
+# state が READY になってから開く
 vercel ls flexq-web | head -10
 ```
+
+> Preview には `NEXT_PUBLIC_SITE_URL` を設定していないが、`src/lib/site.ts` の既定値が
+> 独自ドメインなので canonical / OG は本番と同じ URL で出力される。
+> また Preview は `VERCEL_ENV=preview` のため、**一般公開後も常に noindex** になる。
 
 > Preview は Vercel Authentication で保護されており、**匿名アクセスは 302 で SSO に飛ぶ**。
 > ログイン済みのブラウザからは閲覧できるが、`curl` での自動確認はできない。

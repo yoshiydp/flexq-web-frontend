@@ -3,14 +3,17 @@ import SubPageShell from "@/components/layout/SubPageShell";
 import LegalDocument, {
   type LegalSection,
 } from "@/components/ui/LegalDocument";
+import { CONTACT_EMAIL } from "@/lib/site";
+import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "PRIVACY POLICY | FlexQ",
+export const metadata: Metadata = pageMetadata({
+  title: "PRIVACY POLICY",
   description:
     "FlexQ のプライバシーポリシーです。収集する情報とその取り扱いについて説明します。",
-};
+  path: "/privacy-policy",
+});
 
 const LEAD =
   "FlexQ（以下「本アプリ」といいます）の運営者（以下「当方」といいます）は、本アプリをご利用になるユーザーの皆さま（以下「ユーザー」といいます）の個人情報の重要性を認識し、個人情報の保護に関する法律（個人情報保護法）その他の関係法令を遵守するとともに、本プライバシーポリシー（以下「本ポリシー」といいます）に従って個人情報を適切に取り扱います。";
@@ -100,7 +103,7 @@ const SECTIONS: LegalSection[] = [
     paragraphs: [
       "本ポリシーおよび個人情報の取り扱いに関するお問い合わせは、以下の連絡先までお願いします。",
     ],
-    email: "yoshihisa.watanabe.info@gmail.com",
+    email: CONTACT_EMAIL,
   },
 ];
 

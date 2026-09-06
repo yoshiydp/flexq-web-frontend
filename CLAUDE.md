@@ -147,6 +147,42 @@ lyrics-web-frontend/
 | `/columns` | `src/app/columns/page.tsx` | コラム一覧 |
 | `/columns/[slug]` | `src/app/columns/[slug]/page.tsx` | コラム詳細 |
 
+> `/robots.txt` は `src/app/robots.ts` が生成する（後述の SEO / メタタグを参照）。
+
+---
+
+## SEO / メタタグ
+
+### 値の置き場所
+
+| ファイル | 役割 |
+|---------|------|
+| `src/lib/site.ts` | サイト URL・サイト名・説明文・お問い合わせ先・index 可否の定数。**値を変えるときはここだけ** |
+| `src/lib/metadata.ts` | サブページ共通の metadata を組み立てる `pageMetadata()` |
+| `src/app/layout.tsx` | サイト全体の既定値（title テンプレート・OG・Twitter・robots・theme-color） |
+| `src/app/robots.ts` | `/robots.txt` |
+| `src/components/seo/StructuredData.tsx` | トップページの JSON-LD（Organization / WebSite / MobileApplication） |
+| `public/og.png` | OG 画像（1200x630） |
+
+### 注意点
+
+- **`openGraph` / `twitter` はフィールド単位でマージされない。** ページ側で一部だけ定義すると、
+  ルート（`layout.tsx`）で定義した `og:image` や `og:type` が丸ごと消える。
+  サブページは必ず `pageMetadata()` を通すこと
+- タイトルはルートの `template: "%s | FlexQ"` が付けるため、各ページの `title` には画面名だけを書く
+  （トップページのみ `title: { absolute: ... }` でテンプレートを回避している）
+- `SITE_DESCRIPTION` / `SITE_TITLE` は `src/content/fallbacks.ts` の `seoDescription` / `seoTitle`
+  からも参照している。CMS 未投入時に metadata とページ内容が食い違わないようにするため
+
+### 公開時にやること
+
+1. 独自ドメインを取得したら Vercel の環境変数 `NEXT_PUBLIC_SITE_URL` を設定する
+   （未設定時は `https://flexq-web-frontend.vercel.app` にフォールバックする）
+2. `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする
+   → noindex が外れ、`/robots.txt` が `Allow: /` になる。
+   Preview デプロイ（feature / staging）は `VERCEL_ENV` の判定により公開後も noindex のまま
+3. `src/app/sitemap.ts` を追加する（現在は noindex のため未作成）
+
 ---
 
 ## Strapi API 連携

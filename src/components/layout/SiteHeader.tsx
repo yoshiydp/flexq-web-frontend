@@ -119,7 +119,6 @@ export default function SiteHeader({ links, appStoreUrl, googlePlayUrl }: Props)
           <StoreLinks
             appStoreUrl={appStoreUrl}
             googlePlayUrl={googlePlayUrl}
-            variant="mixed"
             stacked
           />
         </div>

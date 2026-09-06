@@ -1,102 +1,93 @@
-import { cva } from "class-variance-authority";
 import { DOWNLOAD_ANCHOR } from "@/components/layout/navLinks";
 import { cn } from "@/lib/utils";
 
-const storeButton = cva(
-  "group btn-sheen inline-flex shrink-0 items-center justify-center gap-2.5 whitespace-nowrap rounded-full text-[15px] font-semibold tracking-[.05em] no-underline transition-[background-color,box-shadow,transform,translate,border-color] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 active:translate-y-0 motion-reduce:transition-colors motion-reduce:hover:translate-y-0",
-  {
-    variants: {
-      variant: {
-        gold: "bg-primary text-primary-foreground shadow-[0_0_30px_rgba(255,215,0,.3)] hover:bg-[#FFE44D] hover:shadow-[0_0_48px_rgba(255,215,0,.55)] active:shadow-[0_0_24px_rgba(255,215,0,.4)]",
-        outline:
-          "border border-primary bg-transparent text-primary [--sheen-color:rgba(255,215,0,.28)] hover:bg-primary/10 hover:shadow-[0_0_32px_rgba(255,215,0,.22)]",
-      },
-      size: {
-        // SP では縦積み full width、sm 以上で min-width 260px の横並びに切り替わる
-        default: "w-full px-6 py-4 sm:w-auto sm:min-w-[260px] sm:px-9",
-        full: "w-full px-6 py-[18px]",
-      },
-    },
-    defaultVariants: { variant: "gold", size: "default" },
-  },
-);
+/**
+ * ストアバッジの寸法（px）。
+ *
+ * Apple の SVG はバッジがそのまま画像の端まで描かれているが、Google Play の PNG は
+ * 規定のクリアスペースを内側に含んでおり、実際のバッジは画像高さの 76.8% しかない
+ * （646x250 の画像に対し、バッジ本体は 646x192）。同じ height を与えると Google の方が
+ * 一回り小さく見えるため、見た目の高さが揃うよう画像側の高さを割り戻している。
+ *
+ * バッジ画像そのものは加工しない（改変・切り抜きは両社のガイドラインで禁止されている）。
+ */
+const BADGE_HEIGHT = 46;
+const GOOGLE_BADGE_VISIBLE_RATIO = 192 / 250;
 
-type StoreButtonProps = {
-  platform: string;
-  store: string;
-  href: string | null;
-  variant: "gold" | "outline";
-  size?: "default" | "full";
+const badgeLink =
+  "inline-flex shrink-0 items-center justify-center rounded-lg no-underline transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0";
+
+type Props = {
+  appStoreUrl: string | null;
+  googlePlayUrl: string | null;
+  /** SP メニュー・CTA の SP 表示用: 縦積み中央寄せ */
+  stacked?: boolean;
+  className?: string;
 };
 
-function StoreButton({ platform, store, href, variant, size }: StoreButtonProps) {
+type BadgeLinkProps = {
+  href: string | null;
+  children: React.ReactNode;
+};
+
+function BadgeLink({ href, children }: BadgeLinkProps) {
   // CMS の未入力は "" で届くことがあるため、空白のみの値もフォールバック扱いにする
   const resolvedHref = href?.trim() ? href : null;
   return (
     <a
       href={resolvedHref ?? DOWNLOAD_ANCHOR}
       {...(resolvedHref ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={storeButton({ variant, size })}
+      className={badgeLink}
     >
-      <span className="font-mono text-[11px] tracking-[.2em] opacity-70 transition-opacity duration-300 group-hover:opacity-100">
-        {platform}
-      </span>
-      {store}
+      {children}
     </a>
   );
 }
 
-type Props = {
-  appStoreUrl: string | null;
-  googlePlayUrl: string | null;
-  /**
-   * gold: 両方ゴールド塗り（CTA 既定）/ outline: 両方アウトライン /
-   * mixed: App Store = gold, Google Play = outline（SP メニュー用）
-   */
-  variant?: "gold" | "outline" | "mixed";
-  /** SP メニュー・CTA の SP 表示用: 縦積み full width */
-  stacked?: boolean;
-  className?: string;
-};
-
 /**
- * App Store / Google Play のストアボタンペア。
- * ラベル（iPhone / App Store / Android / Google Play）は固定実装、URL は CMS から供給。
+ * App Store / Google Play のストアバッジ。
+ *
+ * Apple・Google が配布している公式バッジ（日本語版）をそのまま使う。
+ * URL は CMS から供給し、未設定のあいだはダウンロード CTA へアンカーする。
+ * 画像は next/image を通さない（バッジは再エンコードせず配布物のまま出す）。
  */
 export default function StoreLinks({
   appStoreUrl,
   googlePlayUrl,
-  variant = "gold",
   stacked = false,
   className,
 }: Props) {
-  const appStoreVariant = variant === "outline" ? "outline" : "gold";
-  const googlePlayVariant = variant === "gold" ? "gold" : "outline";
-  const size = stacked ? "full" : "default";
-
   return (
     <div
       className={cn(
-        stacked
-          ? "flex w-full flex-col gap-3"
-          : "flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-5 sm:gap-y-4",
+        "flex items-center justify-center gap-x-5 gap-y-3",
+        stacked ? "w-full flex-col" : "flex-col sm:w-auto sm:flex-row sm:flex-wrap",
         className,
       )}
     >
-      <StoreButton
-        platform="iPhone"
-        store="App Store"
-        href={appStoreUrl}
-        variant={appStoreVariant}
-        size={size}
-      />
-      <StoreButton
-        platform="Android"
-        store="Google Play"
-        href={googlePlayUrl}
-        variant={googlePlayVariant}
-        size={size}
-      />
+      <BadgeLink href={appStoreUrl}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/badges/app-store-ja.svg"
+          alt="App Store からダウンロード"
+          width={125}
+          height={BADGE_HEIGHT}
+          style={{ height: BADGE_HEIGHT, width: "auto" }}
+        />
+      </BadgeLink>
+      <BadgeLink href={googlePlayUrl}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/badges/google-play-ja.png"
+          alt="Google Play で手に入れよう"
+          width={155}
+          height={60}
+          style={{
+            height: BADGE_HEIGHT / GOOGLE_BADGE_VISIBLE_RATIO,
+            width: "auto",
+          }}
+        />
+      </BadgeLink>
     </div>
   );
 }

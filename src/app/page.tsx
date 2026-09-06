@@ -10,12 +10,14 @@ import Hero from "@/components/sections/Hero";
 import LearnSection from "@/components/sections/LearnSection";
 import NewsSection from "@/components/sections/NewsSection";
 import Statement from "@/components/sections/Statement";
+import StructuredData from "@/components/seo/StructuredData";
 import {
   getColumnItems,
   getNewsItems,
   getTopPageContent,
   getTutorialItems,
 } from "@/lib/content";
+import { OG_IMAGE_PATH, SITE_NAME } from "@/lib/site";
 
 // ISR: Strapi 更新は最長 60 秒で反映される
 export const revalidate = 60;
@@ -23,12 +25,33 @@ export const revalidate = 60;
 export async function generateMetadata(): Promise<Metadata> {
   const content = await getTopPageContent();
   return {
-    title: content.seoTitle,
+    // ルートの template（`%s | FlexQ`）を通すと二重になるため、そのまま使う
+    title: { absolute: content.seoTitle },
     description: content.seoDescription,
+    alternates: { canonical: "/" },
+    // openGraph / twitter はオブジェクトごと上書きされる（マージされない）ため、
+    // ルートで定義した type・locale・画像もここで書き直す必要がある
     openGraph: {
-      siteName: "FlexQ",
+      type: "website",
+      locale: "ja_JP",
+      siteName: SITE_NAME,
+      url: "/",
       title: content.seoTitle,
       description: content.seoDescription,
+      images: [
+        {
+          url: OG_IMAGE_PATH,
+          width: 1200,
+          height: 630,
+          alt: content.seoTitle,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: content.seoTitle,
+      description: content.seoDescription,
+      images: [OG_IMAGE_PATH],
     },
   };
 }
@@ -48,6 +71,7 @@ export default async function Home() {
 
   return (
     <>
+      <StructuredData />
       <SiteHeader
         links={navLinks}
         appStoreUrl={content.cta.appStoreUrl}

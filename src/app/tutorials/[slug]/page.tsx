@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import SubPageShell from "@/components/layout/SubPageShell";
 import Article from "@/components/ui/Article";
 import { getTutorialArticle } from "@/lib/content";
+import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/routes";
 
 export const revalidate = 60;
@@ -13,10 +14,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const article = await getTutorialArticle(slug);
   if (!article) return {};
-  return {
-    title: `${article.seoTitle} | FlexQ`,
-    description: article.seoDescription ?? undefined,
-  };
+  const description = article.seoDescription ?? undefined;
+  return pageMetadata({
+    title: article.seoTitle,
+    description,
+    path: routes.tutorial(slug),
+    type: "article",
+  });
 }
 
 export default async function TutorialArticlePage({ params }: Props) {

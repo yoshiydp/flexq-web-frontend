@@ -14,7 +14,10 @@ export type FeatureItem = {
 
 export type AppScreen = {
   caption: string;
+  /** 静止画。videoUrl がある場合は動画のポスター（読み込み中の表示）を兼ねる */
   imageUrl: string | null;
+  /** 画面収録。拡張子なしのベースパスで、.mp4 / .webm を並べて配信する */
+  videoBasePath?: string | null;
   highlighted: boolean;
 };
 

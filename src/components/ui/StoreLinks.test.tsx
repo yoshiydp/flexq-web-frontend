@@ -2,12 +2,19 @@ import { render, screen } from "@testing-library/react";
 import StoreLinks from "./StoreLinks";
 
 describe("StoreLinks", () => {
-  it("App Store / Google Play の 2 ボタンを表示する", () => {
+  it("App Store / Google Play の公式バッジを表示する", () => {
     render(<StoreLinks appStoreUrl={null} googlePlayUrl={null} />);
     expect(screen.getByRole("link", { name: /App Store/ })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Google Play/ }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByAltText("App Store からダウンロード"),
+    ).toHaveAttribute("src", "/badges/app-store-ja.svg");
+    expect(screen.getByAltText("Google Play で手に入れよう")).toHaveAttribute(
+      "src",
+      "/badges/google-play-ja.png",
+    );
   });
 
   it("URL 未設定時はダウンロード CTA アンカーへフォールバックする", () => {
@@ -40,17 +47,5 @@ describe("StoreLinks", () => {
     expect(appStore).toHaveAttribute("href", "https://apps.apple.com/app/flexq");
     expect(appStore).toHaveAttribute("target", "_blank");
     expect(appStore).toHaveAttribute("rel", "noopener noreferrer");
-  });
-
-  it("mixed バリアントは App Store = gold / Google Play = outline になる", () => {
-    render(
-      <StoreLinks appStoreUrl={null} googlePlayUrl={null} variant="mixed" />,
-    );
-    expect(screen.getByRole("link", { name: /App Store/ })).toHaveClass(
-      "bg-primary",
-    );
-    expect(screen.getByRole("link", { name: /Google Play/ })).toHaveClass(
-      "border-primary",
-    );
   });
 });

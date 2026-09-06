@@ -134,6 +134,8 @@ export async function getTopPageContent(): Promise<TopPageContent> {
       ? cms.screens.map((s) => ({
           caption: s.caption ?? "",
           imageUrl: strapiMediaUrl(s.screenshot),
+          // 画面収録は CMS では扱わずリポジトリ（public/preview/）で管理する
+          videoBasePath: null,
           highlighted: s.highlighted ?? false,
         }))
       : fb.screens,

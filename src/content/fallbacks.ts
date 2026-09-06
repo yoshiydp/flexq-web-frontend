@@ -1,3 +1,4 @@
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 import type { TopPageContent } from "@/types/content";
 
 /**
@@ -121,7 +122,8 @@ export const topPageFallback: TopPageContent = {
     googlePlayUrl: null,
   },
 
-  seoTitle: "FlexQ — YOUR MUSIC. YOUR WORDS.",
-  seoDescription:
-    "FlexQは、シンガー・ラッパー・クリエイターのための音楽制作サポートアプリです。",
+  // metadata（layout.tsx）と同じ値を使う。CMS 未投入時に og/description が
+  // ページごとに食い違わないよう、定義は src/lib/site.ts の 1 箇所に寄せている
+  seoTitle: SITE_TITLE,
+  seoDescription: SITE_DESCRIPTION,
 };

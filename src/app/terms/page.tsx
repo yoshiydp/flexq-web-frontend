@@ -3,14 +3,17 @@ import SubPageShell from "@/components/layout/SubPageShell";
 import LegalDocument, {
   type LegalSection,
 } from "@/components/ui/LegalDocument";
+import { CONTACT_EMAIL } from "@/lib/site";
+import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: "TERMS OF SERVICE | FlexQ",
+export const metadata: Metadata = pageMetadata({
+  title: "TERMS OF SERVICE",
   description:
     "FlexQ の利用規約です。本アプリをご利用いただくうえでの条件を定めています。",
-};
+  path: "/terms",
+});
 
 const LEAD =
   "本利用規約（以下「本規約」といいます）は、FlexQ（以下「本アプリ」といいます）の利用条件を定めるものです。ユーザーの皆さま（以下「ユーザー」といいます）には、本規約に同意のうえ本アプリをご利用いただきます。";
@@ -104,7 +107,7 @@ const SECTIONS: LegalSection[] = [
     paragraphs: [
       "本規約に関するお問い合わせは、以下の連絡先までお願いします。",
     ],
-    email: "yoshihisa.watanabe.info@gmail.com",
+    email: CONTACT_EMAIL,
   },
 ];
 

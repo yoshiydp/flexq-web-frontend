@@ -166,6 +166,25 @@ A レコードだけの変更なら、メール関連のレコードは一切触
 > ConoHa 側の `public_html/flexqstudio.com/` は空にしてある（サーバー標準の `error/` のみ）。
 > DNS が Vercel を向いているため、通常のアクセスでここに到達する経路はない。
 
+### 接続情報の在り処
+
+ConoHa の FTP・メール（`contact@flexqstudio.com`）の接続情報は、**リポジトリには置かない**。
+
+| 情報 | 参照先 |
+|------|-------|
+| FTP のホスト / ユーザー名 / パスワード | ConoHa コントロールパネル、または `docs/conoha-connection.local.md`（gitignore 済み） |
+| メールのパスワード / SMTP・POP サーバー | 同上 |
+| ConoHa の管理画面 | https://www.conoha.jp/ |
+| レジストラ（お名前.com） | https://www.onamae.com/ |
+
+> ⚠️ **パスワードを含む情報をコミットしないこと。** `.gitignore` で `/credentials` と
+> `*.local.md` を除外している。一度コミットすると Git の履歴に残り、後からファイルを
+> 削除しても取り消せない。パスワードは ConoHa の管理画面からいつでも再設定できるため、
+> ファイルに固定するより管理画面で確認する運用の方が安全。
+
+なお **FTP は通常の運用では使わない**（配信は Vercel に移行済み）。
+必要が生じた場合も、平文の FTP（ポート 21）ではなく FTPS を使うこと。
+
 ---
 
 ## 3. 検索エンジンからのブロック（noindex）

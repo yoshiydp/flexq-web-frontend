@@ -467,8 +467,9 @@ git checkout staging
 git merge develop
 git push origin staging   # Vercel が Preview を自動ビルド
 
-# 5. staging の Preview URL を開いて内容を目視確認 ★ここを飛ばさない
-vercel ls flexq-web | head -10   # state が READY のものを開く
+# 5. staging の Preview で内容を目視確認 ★ここを飛ばさない
+#    https://flexq-web-git-staging-flexq-web.vercel.app
+vercel ls flexq-web | head -10   # state が READY になってから開く
 
 # 6. 本番リリース → staging から master へ PR を作成してマージ
 gh pr create --base master --head staging
@@ -527,7 +528,7 @@ curl -s -o /dev/null -w "%{http_code}\n" https://flexqstudio.com/
 | ブランチ | デプロイ先 | URL |
 |---------|-----------|-----|
 | `master` | Production | https://flexqstudio.com |
-| `staging` | Preview | `flexq-web-git-staging-*.vercel.app`（固定・正確な URL はダッシュボード参照） |
+| `staging` | Preview | https://flexq-web-git-staging-flexq-web.vercel.app （ブランチ固定・push のたびに最新へ貼り替わる） |
 | `feature/*` 等 | Preview | ブランチごとに URL が自動発行 |
 
 ### 環境変数

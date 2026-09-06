@@ -45,3 +45,7 @@ next-env.d.ts
 /test-results
 /playwright-report
 /blob-report
+
+# 認証情報（リポジトリは public。パスワード等は絶対にコミットしない）
+/credentials
+*.local.md

@@ -7,6 +7,14 @@ type Props = {
   features: FeatureItem[];
 };
 
+/**
+ * 見出しを読点（、）の直後で分割する。
+ * SP（sm 未満）ではこの句ごとに inline-block で並べ、句の途中で改行されないようにする。
+ */
+function splitTitleByPunctuation(title: string): string[] {
+  return title.split(/(?<=、)/).filter((chunk) => chunk.length > 0);
+}
+
 /** 実写ムービー想定の背景（暗幕オーバーレイ必須）+ 3 カラムのカードグリッド。 */
 export default function Features({ heading, features }: Props) {
   return (
@@ -28,8 +36,15 @@ export default function Features({ heading, features }: Props) {
               <span className="font-mono text-[13px] tracking-[.3em] text-primary">
                 {feature.label}
               </span>
-              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:balance]">
-                {feature.title}
+              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] sm:[text-wrap:balance]">
+                {splitTitleByPunctuation(feature.title).map((chunk, index) => (
+                  <span
+                    key={`${feature.label}-${index}`}
+                    className="inline-block sm:inline"
+                  >
+                    {chunk}
+                  </span>
+                ))}
               </h4>
               <p className="text-[14.5px] leading-[1.9] text-secondary-foreground [text-wrap:pretty]">
                 {feature.description}

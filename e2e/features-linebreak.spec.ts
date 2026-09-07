@@ -4,25 +4,35 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * 3 CORE FEATURES の見出しの改行位置を検証しつつ、
- * ウィンドウ幅をリアルタイムに可変させたスクリーンレコードを生成するフロー。
+ * 3 CORE FEATURES の見出しの改行位置のフロー。
  *
- * 実行:
- *   yarn e2e:record
- *   （事前に開発サーバー（yarn dev）または本番サーバーを起動しておく）
- *
- * 通常の `yarn e2e` では RECORD_VIDEO 未設定のため skip される（録画に時間がかかるため）。
- * 出力: test-results/video/features-linebreak.webm
+ * - 改行位置の検証は通常の `yarn e2e` で実行される
+ * - 幅をリアルタイムに可変させたスクリーンレコードの生成は
+ *   `yarn e2e:record`（RECORD_VIDEO=1）のときのみ実行される
+ *   出力: test-results/video/features-linebreak.mov（および .webm）
  */
 
 const OUT_DIR = path.join(process.cwd(), "test-results", "video");
-const VIDEO_SIZE = { width: 1280, height: 1000 };
+/** 録画はタブレット幅（768px）から SP 幅（320px）までを対象にする */
+const MAX_WIDTH = 768;
 const MIN_WIDTH = 320;
-const STEP = 16;
-/** 静止して改行位置を検証する幅 */
-const CHECKPOINTS = [1024, 768, 375, 320];
+/** 320px でもカード 3 枚（03 - WRITE まで）が収まる高さ */
+const VIDEO_SIZE = { width: MAX_WIDTH, height: 1440 };
+const STEP = 8;
+/** 録画中に静止して改行位置を検証する幅 */
+const CHECKPOINTS = [768, 375, 320];
 
-/** 見出しの実際の改行位置を、1 文字ずつの矩形位置から行単位で復元する。 */
+/** 読点で改行された状態の期待値 */
+const WRAPPED_AT_PUNCTUATION = [
+  ["作りたい場所へ、", "ワンタップ。"],
+  ["思いついた瞬間、", "そのまま録る。"],
+  ["聴きながら、", "そのまま書く。"],
+];
+
+/**
+ * 見出しの実際の改行位置を、1 文字ずつの矩形位置から行単位で復元する。
+ * text-wrap の結果は CSS からは読めないため、描画位置から判定する。
+ */
 async function readHeadingLines(page: Page): Promise<string[][]> {
   return page.$$eval("#features h4", (els) =>
     els.map((el) => {
@@ -55,18 +65,40 @@ async function readHeadingLines(page: Page): Promise<string[][]> {
   );
 }
 
-/** 1280px → 320px の幅の並び（チェックポイントを必ず通る）。 */
+/** MAX_WIDTH → MIN_WIDTH の幅の並び（チェックポイントを必ず通る）。 */
 function descendingWidths(): number[] {
   const steps = new Set<number>();
-  for (let w = VIDEO_SIZE.width; w >= MIN_WIDTH; w -= STEP) steps.add(w);
+  for (let w = MAX_WIDTH; w >= MIN_WIDTH; w -= STEP) steps.add(w);
   steps.add(MIN_WIDTH);
   for (const checkpoint of CHECKPOINTS) steps.add(checkpoint);
   return [...steps].sort((a, b) => b - a);
 }
 
-test("3 CORE FEATURES の見出しが lg 未満では読点で改行される（録画付き）", async ({
-  browser,
+test("見出しは lg 未満では読点で改行され、lg 以上は従来どおり", async ({
+  page,
 }) => {
+  test.skip(
+    test.info().project.name !== "desktop",
+    "幅を直接変えて検証するため desktop プロジェクトでのみ実行する",
+  );
+
+  await page.goto("/");
+  await expect(page.locator("#features h4").first()).toBeVisible();
+
+  for (const width of [1023, 768, 375, 320]) {
+    await page.setViewportSize({ width, height: 1000 });
+    expect(await readHeadingLines(page), `${width}px`).toEqual(
+      WRAPPED_AT_PUNCTUATION,
+    );
+  }
+
+  // lg 以上は text-wrap: balance に任せる（句の途中で改行され得る）
+  await page.setViewportSize({ width: 1024, height: 1000 });
+  const atLg = await readHeadingLines(page);
+  expect(atLg[0]).toEqual(["作りたい場所", "へ、ワンタップ。"]);
+});
+
+test("幅を可変させた録画を生成する", async ({ browser }) => {
   test.skip(
     test.info().project.name !== "desktop",
     "録画フローは desktop プロジェクトでのみ実行する",
@@ -91,7 +123,6 @@ test("3 CORE FEATURES の見出しが lg 未満では読点で改行される（
   await page.addStyleTag({
     content: "nextjs-portal { display: none !important; }",
   });
-
   await expect(page.locator("#features h4").first()).toBeVisible();
   await page.waitForLoadState("networkidle");
 
@@ -145,13 +176,13 @@ test("3 CORE FEATURES の見出しが lg 未満では読点で改行される（
     document.body.appendChild(badge);
   });
 
-  /** 幅を変え、見出しが画面内に収まる位置までスクロールし直す。 */
+  /** 幅を変え、カード 3 枚が画面内に収まる位置までスクロールし直す。 */
   const resize = async (width: number, settleMs: number) => {
     await page.setViewportSize({ width, height: VIDEO_SIZE.height });
     await page.evaluate(() => {
-      const el = document.querySelector("#features h4");
-      const top = (el?.getBoundingClientRect().top ?? 0) + window.scrollY;
-      window.scrollTo({ top: Math.max(0, top - 140), behavior: "instant" });
+      const card = document.querySelector("#features article");
+      const top = (card?.getBoundingClientRect().top ?? 0) + window.scrollY;
+      window.scrollTo({ top: Math.max(0, top - 28), behavior: "instant" });
     });
     await page.waitForTimeout(settleMs);
   };
@@ -159,7 +190,7 @@ test("3 CORE FEATURES の見出しが lg 未満では読点で改行される（
   const widths = descendingWidths();
   const verified: Record<number, string[][]> = {};
 
-  // 1280px → 320px へなめらかに狭め、要所で静止して改行位置を計測する
+  // 768px → 320px へなめらかに狭め、要所で静止して改行位置を計測する
   for (const width of widths) {
     await resize(width, 80);
     if (CHECKPOINTS.includes(width)) {
@@ -170,7 +201,7 @@ test("3 CORE FEATURES の見出しが lg 未満では読点で改行される（
 
   await page.waitForTimeout(700);
 
-  // 320px → 1280px へ戻す
+  // 320px → 768px へ戻す
   for (const width of [...widths].reverse()) {
     await resize(width, 55);
   }
@@ -183,15 +214,9 @@ test("3 CORE FEATURES の見出しが lg 未満では読点で改行される（
     renameSync(source, path.join(OUT_DIR, "features-linebreak.webm"));
   }
 
-  // lg 未満（1023px 以下）は読点の直後で改行される
-  for (const width of [768, 375, 320]) {
-    expect(verified[width], `${width}px の計測結果`).toEqual([
-      ["作りたい場所へ、", "ワンタップ。"],
-      ["思いついた瞬間、", "そのまま録る。"],
-      ["聴きながら、", "そのまま書く。"],
-    ]);
+  for (const width of CHECKPOINTS) {
+    expect(verified[width], `${width}px の計測結果`).toEqual(
+      WRAPPED_AT_PUNCTUATION,
+    );
   }
-
-  // lg 以上は従来どおり text-wrap: balance に任せる（句の途中で改行され得る）
-  expect(verified[1024][0]).toEqual(["作りたい場所", "へ、ワンタップ。"]);
 });

@@ -7,12 +7,20 @@ import { expect, test, type Page } from "@playwright/test";
  * 3 CORE FEATURES の見出しの改行位置のフロー。
  *
  * - 改行位置の検証は通常の `yarn e2e` で実行される
- * - 幅をリアルタイムに可変させたスクリーンレコードの生成は
- *   `yarn e2e:record`（RECORD_VIDEO=1）のときのみ実行される
+ * - PC / TB / SP のスクリーンショットと、幅をリアルタイムに可変させた
+ *   スクリーンレコードの生成は `yarn e2e:record`（RECORD_VIDEO=1）のときのみ実行される
  *   出力: test-results/video/features-linebreak.mov（および .webm）
+ *         test-results/screenshots/features-{pc,tablet,sp}.png
  */
 
 const OUT_DIR = path.join(process.cwd(), "test-results", "video");
+const SHOT_DIR = path.join(process.cwd(), "test-results", "screenshots");
+/** スクリーンショットを撮る代表的な画面幅 */
+const SNAPSHOT_SIZES = [
+  { name: "pc", width: 1440, height: 900 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "sp", width: 375, height: 812 },
+];
 /** 録画はタブレット幅（768px）から SP 幅（320px）までを対象にする */
 const MAX_WIDTH = 768;
 const MIN_WIDTH = 320;
@@ -96,6 +104,52 @@ test("見出しは lg 未満では読点で改行され、lg 以上は従来ど�
   await page.setViewportSize({ width: 1024, height: 1000 });
   const atLg = await readHeadingLines(page);
   expect(atLg[0]).toEqual(["作りたい場所", "へ、ワンタップ。"]);
+});
+
+test("PC / TB / SP のスクリーンショットを生成する", async ({ browser }) => {
+  test.skip(
+    test.info().project.name !== "desktop",
+    "幅を直接指定するため desktop プロジェクトでのみ実行する",
+  );
+  test.skip(
+    !process.env.RECORD_VIDEO,
+    "スクリーンショット生成は RECORD_VIDEO=1 のときのみ実行する",
+  );
+
+  mkdirSync(SHOT_DIR, { recursive: true });
+
+  for (const size of SNAPSHOT_SIZES) {
+    const context = await browser.newContext({
+      viewport: { width: size.width, height: size.height },
+      // Retina 相当で書き出す
+      deviceScaleFactor: 2,
+    });
+    const page = await context.newPage();
+    await page.goto("/");
+    await page.addStyleTag({
+      content: "nextjs-portal { display: none !important; }",
+    });
+    await expect(page.locator("#features h4").first()).toBeVisible();
+    await page.waitForLoadState("networkidle");
+
+    expect(
+      await readHeadingLines(page),
+      `${size.name}（${size.width}px）`,
+    ).toEqual(
+      size.width >= 1024
+        ? [
+            ["作りたい場所へ、ワンタップ。"],
+            ["思いついた瞬間、そのまま録る。"],
+            ["聴きながら、そのまま書く。"],
+          ]
+        : WRAPPED_AT_PUNCTUATION,
+    );
+
+    await page
+      .locator("#features")
+      .screenshot({ path: path.join(SHOT_DIR, `features-${size.name}.png`) });
+    await context.close();
+  }
 });
 
 test("幅を可変させた録画を生成する", async ({ browser }) => {

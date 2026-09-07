@@ -10,7 +10,8 @@
     "test": "jest --watchAll",
     "test:ci": "jest --ci --coverage",
     "e2e": "playwright test",
-    "e2e:ui": "playwright test --ui"
+    "e2e:ui": "playwright test --ui",
+    "e2e:record": "RECORD_VIDEO=1 playwright test e2e/features-linebreak.spec.ts --project=desktop && ffmpeg -y -loglevel error -i test-results/video/features-linebreak.webm -c:v libx264 -pix_fmt yuv420p -movflags +faststart test-results/video/features-linebreak.mov"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

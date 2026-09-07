@@ -36,7 +36,12 @@ export default function Features({ heading, features }: Props) {
               <span className="font-mono text-[13px] tracking-[.3em] text-primary">
                 {feature.label}
               </span>
-              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] lg:[text-wrap:balance]">
+              {/*
+                PC（3 カラム）でのカード内幅は 308.7px。22px だと 02 - REC の
+                「思いついた瞬間、そのまま録る。」（330px）が入りきらず折り返すため、
+                lg 以上は 20px（300px）に落として 3 枚とも 1 行に収める。
+              */}
+              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] lg:text-[20px] lg:[text-wrap:balance]">
                 {splitTitleByPunctuation(feature.title).map((chunk, index) => (
                   <span
                     key={`${feature.label}-${index}`}

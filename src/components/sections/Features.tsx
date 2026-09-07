@@ -9,7 +9,7 @@ type Props = {
 
 /**
  * 見出しを読点（、）の直後で分割する。
- * SP（sm 未満）ではこの句ごとに inline-block で並べ、句の途中で改行されないようにする。
+ * SP・タブレット（lg 未満）ではこの句ごとに inline-block で並べ、句の途中で改行されないようにする。
  */
 function splitTitleByPunctuation(title: string): string[] {
   return title.split(/(?<=、)/).filter((chunk) => chunk.length > 0);
@@ -36,11 +36,11 @@ export default function Features({ heading, features }: Props) {
               <span className="font-mono text-[13px] tracking-[.3em] text-primary">
                 {feature.label}
               </span>
-              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] sm:[text-wrap:balance]">
+              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] lg:[text-wrap:balance]">
                 {splitTitleByPunctuation(feature.title).map((chunk, index) => (
                   <span
                     key={`${feature.label}-${index}`}
-                    className="inline-block sm:inline"
+                    className="inline-block lg:inline"
                   >
                     {chunk}
                   </span>

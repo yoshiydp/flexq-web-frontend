@@ -36,6 +36,17 @@ describe("StoreLinks", () => {
     );
   });
 
+  it("既定は横並びで、幅が足りないときだけ折り返す（stacked 時は縦積み）", () => {
+    const { container, rerender } = render(
+      <StoreLinks appStoreUrl={null} googlePlayUrl={null} />,
+    );
+    expect(container.firstChild).toHaveClass("flex-row", "flex-wrap");
+    expect(container.firstChild).not.toHaveClass("flex-col");
+
+    rerender(<StoreLinks appStoreUrl={null} googlePlayUrl={null} stacked />);
+    expect(container.firstChild).toHaveClass("flex-col", "w-full");
+  });
+
   it("URL 設定時は外部リンクとして開く", () => {
     render(
       <StoreLinks

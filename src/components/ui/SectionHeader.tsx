@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Reveal from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -14,6 +15,9 @@ type Props = {
 /**
  * セクション見出しの共通パターン:
  * mono 14px / tracking .45em / gold + 右へ伸びる 1px の罫線（テキストの上下中央に配置）。
+ *
+ * 画面内に入ると、見出しが下 → 上へフェードインし、少し遅れて罫線が
+ * 見出し側から外側へ 0 → 100% に伸びる（VIEW ALL は罫線と同じタイミングでフェード）。
  */
 export default function SectionHeader({
   title,
@@ -24,12 +28,14 @@ export default function SectionHeader({
   const centered = align === "center";
 
   return (
-    <div className="flex items-center gap-6">
+    <Reveal className="flex items-center gap-6">
       {/* 罫線（と VIEW ALL）はテキストの上下中央に揃える */}
-      {centered && <span className="block h-px flex-1 bg-border" />}
+      {centered && (
+        <span className="reveal-line reveal-line-rtl block h-px flex-1 bg-border [--reveal-delay:250ms]" />
+      )}
       <h3
         className={cn(
-          "font-mono tracking-[.45em] text-primary",
+          "reveal-up font-mono tracking-[.45em] text-primary",
           // lg は SP では 2 段小さく（14px）、md 以上で 18px
           size === "lg" ? "text-sm md:text-lg" : "text-sm",
           centered && "text-center",
@@ -37,15 +43,19 @@ export default function SectionHeader({
       >
         {title}
       </h3>
-      <span className="block h-px flex-1 bg-border" />
+      <span className="reveal-line block h-px flex-1 bg-border [--reveal-delay:250ms]" />
       {!centered && viewAllHref && (
-        <Link
-          href={viewAllHref}
-          className="link-underline font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
-        >
-          VIEW&nbsp;ALL&nbsp;→
-        </Link>
+        // リンク自身は hover 用の transition-colors を持ち、reveal の
+        // transition-property と競合するため、フェードは外側の span に持たせる
+        <span className="reveal-up [--reveal-delay:250ms]">
+          <Link
+            href={viewAllHref}
+            className="link-underline font-mono text-xs tracking-[.25em] text-secondary-foreground transition-colors hover:text-primary"
+          >
+            VIEW&nbsp;ALL&nbsp;→
+          </Link>
+        </span>
       )}
-    </div>
+    </Reveal>
   );
 }

@@ -28,6 +28,29 @@ describe("SectionHeader", () => {
     ).toHaveClass("text-center");
   });
 
+  it("見出しは下から上へのフェード、罫線は伸びるアニメーションを持つ", () => {
+    const { container, rerender } = render(<SectionHeader title="FAQ" />);
+    expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass(
+      "reveal-up",
+    );
+    let lines = container.querySelectorAll(".reveal-line");
+    expect(lines).toHaveLength(1);
+    expect(lines[0]).not.toHaveClass("reveal-line-rtl");
+
+    // VIEW ALL はリンク自身の transition-colors と競合しないよう外側の span でフェードする
+    rerender(<SectionHeader title="NEWS" viewAllHref="/news" />);
+    const viewAll = screen.getByRole("link", { name: /VIEW\sALL/ });
+    expect(viewAll).not.toHaveClass("reveal-up");
+    expect(viewAll.parentElement).toHaveClass("reveal-up");
+
+    // center は左右 2 本。左の罫線は見出し側（右端）から伸びる
+    rerender(<SectionHeader title="FAQ" align="center" />);
+    lines = container.querySelectorAll(".reveal-line");
+    expect(lines).toHaveLength(2);
+    expect(lines[0]).toHaveClass("reveal-line-rtl");
+    expect(lines[1]).not.toHaveClass("reveal-line-rtl");
+  });
+
   it("size=lg 指定時は見出しを一回り大きくする", () => {
     const { rerender } = render(<SectionHeader title="FAQ" />);
     expect(screen.getByRole("heading", { name: "FAQ" })).toHaveClass("text-sm");

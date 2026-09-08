@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Reveal from "@/components/ui/Reveal";
 import SectionBackground from "@/components/ui/SectionBackground";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { cn } from "@/lib/utils";
@@ -264,104 +265,112 @@ export default function AppPreview({ heading, screens }: Props) {
       <div className="relative mx-auto flex max-w-[1180px] flex-col gap-16">
         <SectionHeader title={heading} />
 
-        {/* PC: 自動カルーセル */}
-        <div
-          className="relative hidden overflow-hidden md:block"
-          aria-roledescription="carousel"
-          style={{
-            // 左右の見切れをハードな断ち切りにせず、端に向かって透明にする
-            WebkitMaskImage: PC_EDGE_FADE,
-            maskImage: PC_EDGE_FADE,
-            // 上はアクティブな枠の真上からグローが出るため、blur ぶんの余白が要る。
-            // 下は枠とキャプションの間隔（18px）とキャプション自身の高さが
-            // 稼いでくれるので、その差分だけ足す
-            paddingTop: PC_GLOW_BLUR + PC_GLOW_MARGIN,
-            paddingBottom: PC_GLOW_MARGIN,
-          }}
-        >
+        {/* カルーセル全体（PC / SP）を下から上へフェードイン */}
+        <Reveal className="reveal-up">
+          {/* PC: 自動カルーセル */}
           <div
-            className="flex w-max will-change-transform"
+            className="relative hidden overflow-hidden md:block"
+            aria-roledescription="carousel"
             style={{
-              marginLeft: "50%",
-              gap: `${PC_GAP}px`,
-              transform: `translateX(${-(pcIndex * PC_STRIDE + PC_ITEM_W / 2)}px)`,
-              transition: pcAnimated
-                ? `transform ${PC_TRANSITION_MS}ms ${PC_EASING}`
-                : "none",
+              // 左右の見切れをハードな断ち切りにせず、端に向かって透明にする
+              WebkitMaskImage: PC_EDGE_FADE,
+              maskImage: PC_EDGE_FADE,
+              // 上はアクティブな枠の真上からグローが出るため、blur ぶんの余白が要る。
+              // 下は枠とキャプションの間隔（18px）とキャプション自身の高さが
+              // 稼いでくれるので、その差分だけ足す
+              paddingTop: PC_GLOW_BLUR + PC_GLOW_MARGIN,
+              paddingBottom: PC_GLOW_MARGIN,
             }}
-            onTransitionEnd={handlePcTransitionEnd}
           >
-            {loopScreens.map((screen, index) => (
-              <PcPhoneItem
-                key={`${screen.caption}-${index}`}
-                screen={screen}
-                active={index === pcIndex}
-                animated={pcAnimated}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* SP: 手動スワイプのピーク型カルーセル */}
-        <div className="flex flex-col gap-5 md:hidden">
-          <div
-            ref={trackRef}
-            onScroll={handleScroll}
-            className="scrollbar-hide flex items-center gap-4 overflow-x-auto [scroll-snap-type:x_mandatory]"
-          >
-            {/* 先頭・末尾のスライドも中央で止めるためのスペーサー */}
-            <span className="block flex-[0_0_calc(50%-min(36vw,150px)-16px)]" />
-            {screens.map((screen, index) => (
-              <figure
-                key={screen.caption}
-                className={cn(
-                  "m-0 flex flex-[0_0_min(72vw,300px)] [scroll-snap-align:center] flex-col items-center gap-4 transition-opacity duration-300",
-                  index === spIndex ? "opacity-100" : "opacity-40",
-                )}
-              >
-                <div
-                  className={cn(
-                    "box-border w-full rounded-[40px] border bg-[#111111] p-[9px] transition-[border-color,box-shadow] duration-300",
-                    index === spIndex
-                      ? "border-primary shadow-[0_0_50px_rgba(255,215,0,.15),0_20px_60px_rgba(0,0,0,.6)]"
-                      : "border-border shadow-[0_20px_60px_rgba(0,0,0,.6)]",
-                  )}
-                >
-                  <Screen screen={screen} radiusClassName="rounded-[32px]" />
-                </div>
-                <figcaption
-                  className={cn(
-                    "font-mono text-[11px] tracking-[.3em] transition-colors duration-300",
-                    index === spIndex ? "text-primary" : "text-muted-foreground",
-                  )}
-                >
-                  {screen.caption}
-                </figcaption>
-              </figure>
-            ))}
-            <span className="block flex-[0_0_calc(50%-min(36vw,150px)-16px)]" />
-          </div>
-
-          {/* ドットインジケーター */}
-          <div className="flex justify-center gap-1">
-            {screens.map((screen, index) => (
-              <button
-                key={screen.caption}
-                type="button"
-                onClick={() => scrollTo(index)}
-                aria-label={screen.caption}
-                className="flex size-7 items-center justify-center"
-              >
-                <span
-                  className={cn(
-                    "block size-2 rounded-full transition-colors duration-300",
-                    index === spIndex ? "bg-primary" : "bg-[#444444]",
-                  )}
+            <div
+              className="flex w-max will-change-transform"
+              style={{
+                marginLeft: "50%",
+                gap: `${PC_GAP}px`,
+                transform: `translateX(${-(pcIndex * PC_STRIDE + PC_ITEM_W / 2)}px)`,
+                transition: pcAnimated
+                  ? `transform ${PC_TRANSITION_MS}ms ${PC_EASING}`
+                  : "none",
+              }}
+              onTransitionEnd={handlePcTransitionEnd}
+            >
+              {loopScreens.map((screen, index) => (
+                <PcPhoneItem
+                  key={`${screen.caption}-${index}`}
+                  screen={screen}
+                  active={index === pcIndex}
+                  animated={pcAnimated}
                 />
-              </button>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
+
+          {/* SP: 手動スワイプのピーク型カルーセル */}
+          <div className="flex flex-col gap-5 md:hidden">
+            <div
+              ref={trackRef}
+              onScroll={handleScroll}
+              // トラックパッドの横スワイプに混じる僅かな縦成分を Lenis（慣性スクロール）が
+              // 奪わないよう、この上では wheel をネイティブのまま通す
+              data-lenis-prevent-wheel=""
+              className="scrollbar-hide flex items-center gap-4 overflow-x-auto [scroll-snap-type:x_mandatory]"
+            >
+              {/* 先頭・末尾のスライドも中央で止めるためのスペーサー */}
+              <span className="block flex-[0_0_calc(50%-min(36vw,150px)-16px)]" />
+              {screens.map((screen, index) => (
+                <figure
+                  key={screen.caption}
+                  className={cn(
+                    "m-0 flex flex-[0_0_min(72vw,300px)] [scroll-snap-align:center] flex-col items-center gap-4 transition-opacity duration-300",
+                    index === spIndex ? "opacity-100" : "opacity-40",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "box-border w-full rounded-[40px] border bg-[#111111] p-[9px] transition-[border-color,box-shadow] duration-300",
+                      index === spIndex
+                        ? "border-primary shadow-[0_0_50px_rgba(255,215,0,.15),0_20px_60px_rgba(0,0,0,.6)]"
+                        : "border-border shadow-[0_20px_60px_rgba(0,0,0,.6)]",
+                    )}
+                  >
+                    <Screen screen={screen} radiusClassName="rounded-[32px]" />
+                  </div>
+                  <figcaption
+                    className={cn(
+                      "font-mono text-[11px] tracking-[.3em] transition-colors duration-300",
+                      index === spIndex
+                        ? "text-primary"
+                        : "text-muted-foreground",
+                    )}
+                  >
+                    {screen.caption}
+                  </figcaption>
+                </figure>
+              ))}
+              <span className="block flex-[0_0_calc(50%-min(36vw,150px)-16px)]" />
+            </div>
+
+            {/* ドットインジケーター */}
+            <div className="flex justify-center gap-1">
+              {screens.map((screen, index) => (
+                <button
+                  key={screen.caption}
+                  type="button"
+                  onClick={() => scrollTo(index)}
+                  aria-label={screen.caption}
+                  className="flex size-7 items-center justify-center"
+                >
+                  <span
+                    className={cn(
+                      "block size-2 rounded-full transition-colors duration-300",
+                      index === spIndex ? "bg-primary" : "bg-[#444444]",
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

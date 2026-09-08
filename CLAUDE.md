@@ -120,7 +120,12 @@ lyrics-web-frontend/
 │   │   │   ├── GlitchCanvas.tsx
 │   │   │   ├── GlitchScene.tsx
 │   │   │   └── shaders.ts
+│   │   ├── layout/
+│   │   │   ├── PageTransition.tsx  # ページ遷移のフェードイン / アウト
+│   │   │   └── SmoothScroll.tsx    # 慣性スクロール（Lenis）・ページ内アンカーの処理
 │   │   └── ui/                # shadcn/ui コンポーネント（npx shadcn add で追加）
+│   │       ├── Reveal.tsx     # スクロール連動リビールのトリガー（IntersectionObserver）
+│   │       └── SectionHeader.tsx  # セクション見出し（フェード + 罫線の伸長アニメーション）
 │   ├── lib/
 │   │   └── utils.ts           # cn() ユーティリティ
 │   ├── hooks/                 # カスタムフック
@@ -132,6 +137,41 @@ lyrics-web-frontend/
 ├── next.config.ts             # Next.js 設定
 └── tsconfig.json
 ```
+
+---
+
+## スクロール演出（慣性スクロール・リビール）
+
+### 慣性スクロール（Lenis）
+
+`src/components/layout/SmoothScroll.tsx` がルートレイアウトで [Lenis](https://github.com/darkroomengineering/lenis) を初期化し、wheel / トラックパッドのスクロールに慣性（`lerp: 0.1`）を付ける。タッチ操作は OS ネイティブのまま。
+
+- `prefers-reduced-motion` は Lenis 自身が尊重する（補間なし・`scrollTo` は即時ジャンプ）
+- 同一ページ内のアンカー（`#features` など）は `SmoothScroll` が既定のジャンプを止め、`history.pushState` でハッシュを更新してから `lenis.scrollTo` する（Lenis の `anchors` オプションはハッシュを更新しないため自前で処理している。E2E の `toHaveURL(/#statement$/)` がこれに依存）
+- `lenis.css` は html / body の `height` を auto にして `min-h-full` を壊すため取り込まず、必要な分だけ `globals.css` に書いている（`html.lenis { scroll-behavior: auto }` で CSS の smooth scroll との二重補間を防ぐ）
+- ネイティブスクロールをそのまま使わせたい要素には `data-lenis-prevent`（wheel のみなら `data-lenis-prevent-wheel`）を付ける。AppPreview の SP 横スクロールカルーセルは、トラックパッドの横ジェスチャーに混じる僅かな縦成分を Lenis が奪わないよう `data-lenis-prevent-wheel` を付けている
+- `naiveDimensions: true` は必須。`html` が `h-full` で高さ固定のため ResizeObserver ではコンテンツ高の変化（FAQ の開閉・ページ遷移）を検知できず、スクロール下限が古いまま残る
+- アンカー到着後は移動先セクションへフォーカスを移す（`tabindex=-1` を付与・`preventScroll`）。既定のアンカー遷移と同じく、以降の Tab 移動がそのセクションから続くようにするため
+- `stopInertiaOnNavigate: true` + `usePathname` 監視 + `popstate` 監視で、別ページへの遷移・同一ページ内の戻る / 進むの際に慣性を止める（残っていると Lenis が古い目標位置へ動き続け、Next.js の先頭スクロールやブラウザの復元位置を上書きする）
+- **慣性が動いている最中の `window.scrollTo(..., instant)` は Lenis に上書きされる**（E2E や検証スクリプトで instant スクロールする場合は、慣性が止まってから行う）
+
+### スクロール連動リビール（Reveal）
+
+トップページのキービジュアル以下は、画面内に入ったタイミングで一度だけアニメーションする。
+
+| 部品 | 役割 |
+|------|------|
+| `src/components/ui/Reveal.tsx` | トリガー。IntersectionObserver で画面内に入ると `is-revealed` クラスを付ける（要素上端が画面下端からビューポート高さの 15% 入った位置で発火。`rootMargin` の % は幅基準で解決されるため px で計算しリサイズで作り直す。既にスクロール済みで画面より上にある要素は即時表示） |
+| `globals.css` の `reveal-up` | 下 → 上へのフェードイン（0.9s） |
+| `globals.css` の `reveal-line` | 罫線が 0 → 100% に伸びる（1.1s・`scaleX`。既定は左端から、`reveal-line-rtl` は右端から） |
+| `--reveal-delay` | 段差表示。`Reveal` の `delay` prop（ms）または `[--reveal-delay:200ms]` |
+
+- `Reveal` 自身に `reveal-up` を付けても、子孫要素に付けてもよい（子孫に付けると同じトリガーで一斉に始まり、`--reveal-delay` で段差を付けられる。例: `SectionHeader` / `Statement` / `CtaSection`）
+- hover で `translate` / `transition-*` ユーティリティを使う要素（Features のカード・NewsCard・FAQ の details）には直接 `reveal-up` を付けず、`Reveal` のラッパーに持たせる（`transition-property` が競合して片方が効かなくなる）。グリッドのカードはラッパーを `grid` にして高さを揃える
+- リビールの CSS は `@layer components` に置いてあり、Tailwind のユーティリティで上書きできる
+- 子孫要素にキーボードフォーカスが当たった場合は `is-revealed-instant` を付け、子孫の `--reveal-delay` も含めてトランジションを止めて即時に表示する（発火帯より下の FAQ などにフォーカスリングごと透明なまま止まらないようにするため。フェード途中のフォーカスも即時表示に切り替える）
+- `prefers-reduced-motion` では非表示状態にせず常に表示する。IntersectionObserver が無い環境（jsdom）でも即時表示する。JS 無効時は `layout.tsx` の `<noscript>` スタイルで非表示状態を解除する（クライアントバンドルの読み込み失敗までは救えない）
+- E2E の `toBeVisible()` は opacity を見ないため、非表示状態でも通る。位置を厳密に見るテストはアニメーション終了（約 1.2s）を待つ
 
 ---
 

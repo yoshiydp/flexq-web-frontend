@@ -61,7 +61,9 @@ export default function StoreLinks({
     <div
       className={cn(
         "flex items-center justify-center gap-x-5 gap-y-3",
-        stacked ? "w-full flex-col" : "flex-col sm:w-auto sm:flex-row sm:flex-wrap",
+        // 既定は横並び。ブレークポイントではなく flex-wrap に任せ、
+        // 2 つのバッジが横に収まらない幅になったときだけ折り返して縦に並ぶ
+        stacked ? "w-full flex-col" : "flex-row flex-wrap",
         className,
       )}
     >

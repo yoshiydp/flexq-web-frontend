@@ -1,4 +1,5 @@
 import NewsCard from "@/components/ui/NewsCard";
+import Reveal from "@/components/ui/Reveal";
 import SectionBackground from "@/components/ui/SectionBackground";
 import SectionHeader from "@/components/ui/SectionHeader";
 import { routes } from "@/lib/routes";
@@ -24,8 +25,11 @@ export default function NewsSection({ heading, items }: Props) {
         <SectionHeader title={heading} viewAllHref={routes.news} />
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-7">
-          {items.map((item) => (
-            <NewsCard key={item.id} item={item} />
+          {items.map((item, index) => (
+            // カードは hover で translate を使うため、リビールは外側のラッパーに持たせる
+            <Reveal key={item.id} className="reveal-up grid" delay={index * 120}>
+              <NewsCard item={item} />
+            </Reveal>
           ))}
         </div>
       </div>

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Qwigley } from "next/font/google";
+import SmoothScroll from "@/components/layout/SmoothScroll";
 import {
   IS_INDEXABLE,
   OG_IMAGE_PATH,
@@ -99,7 +100,19 @@ export default function RootLayout({
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} ${qwigley.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {/* JS 無効時はスクロール連動リビール（Reveal）の非表示状態を解除して
+            サーバー描画のコンテンツをそのまま見せる */}
+        <noscript
+          dangerouslySetInnerHTML={{
+            __html:
+              "<style>.reveal-up,.reveal-line{opacity:1;transform:none;transition:none}</style>",
+          }}
+        />
+        {/* 慣性スクロール。ページ遷移で再マウントされないようルートに置く */}
+        <SmoothScroll />
+        {children}
+      </body>
     </html>
   );
 }

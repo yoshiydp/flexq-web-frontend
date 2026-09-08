@@ -1,3 +1,4 @@
+import Reveal from "@/components/ui/Reveal";
 import SectionBackground from "@/components/ui/SectionBackground";
 import SectionHeader from "@/components/ui/SectionHeader";
 import type { FaqItem } from "@/types/content";
@@ -22,18 +23,22 @@ export default function FaqSection({ heading, faqs }: Props) {
         <SectionHeader title={heading} />
 
         <div className="flex flex-col gap-4">
-          {faqs.map((faq) => (
-            <details
+          {faqs.map((faq, index) => (
+            // details は transition-colors を持つため、リビールは外側のラッパーに持たせる
+            <Reveal
               key={faq.question}
-              className="rounded-lg border border-border bg-card px-7 py-6 transition-colors open:border-primary/40"
+              className="reveal-up"
+              delay={Math.min(index, 3) * 80}
             >
-              <summary className="cursor-pointer text-base font-medium text-foreground">
-                {faq.question}
-              </summary>
-              <p className="mt-4 text-sm leading-[1.9] text-secondary-foreground">
-                {faq.answer}
-              </p>
-            </details>
+              <details className="rounded-lg border border-border bg-card px-7 py-6 transition-colors open:border-primary/40">
+                <summary className="cursor-pointer text-base font-medium text-foreground">
+                  {faq.question}
+                </summary>
+                <p className="mt-4 text-sm leading-[1.9] text-secondary-foreground">
+                  {faq.answer}
+                </p>
+              </details>
+            </Reveal>
           ))}
         </div>
       </div>

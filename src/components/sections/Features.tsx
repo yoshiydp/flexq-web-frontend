@@ -1,3 +1,4 @@
+import Reveal from "@/components/ui/Reveal";
 import SectionBackground from "@/components/ui/SectionBackground";
 import SectionHeader from "@/components/ui/SectionHeader";
 import type { FeatureItem } from "@/types/content";
@@ -28,33 +29,40 @@ export default function Features({ heading, features }: Props) {
         <SectionHeader title={heading} align="center" size="lg" />
 
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(280px,100%),1fr))] gap-7">
-          {features.map((feature) => (
-            <article
+          {features.map((feature, index) => (
+            // カードは hover で translate / transition を使うため、リビールは
+            // 外側のラッパーに持たせて干渉させない（grid でカードを枠いっぱいに伸ばす）
+            <Reveal
               key={feature.label + feature.title}
-              className="flex flex-col gap-5 rounded-lg border border-border bg-card px-8 py-10 transition-[border-color,box-shadow,transform,translate] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-primary hover:shadow-[0_0_36px_rgba(255,215,0,.12)] motion-reduce:transition-colors motion-reduce:hover:translate-y-0"
+              className="reveal-up grid"
+              delay={index * 120}
             >
-              <span className="font-mono text-[13px] tracking-[.3em] text-primary">
-                {feature.label}
-              </span>
-              {/*
-                PC（3 カラム）でのカード内幅は 308.7px。22px だと 02 - REC の
-                「思いついた瞬間、そのまま録る。」（330px）が入りきらず折り返すため、
-                lg 以上は 20px（300px）に落として 3 枚とも 1 行に収める。
-              */}
-              <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] lg:text-[20px] lg:[text-wrap:balance]">
-                {splitTitleByPunctuation(feature.title).map((chunk, index) => (
-                  <span
-                    key={`${feature.label}-${index}`}
-                    className="inline-block lg:inline"
-                  >
-                    {chunk}
-                  </span>
-                ))}
-              </h4>
-              <p className="text-[14.5px] leading-[1.9] text-secondary-foreground [text-wrap:pretty]">
-                {feature.description}
-              </p>
-            </article>
+              <article className="flex flex-col gap-5 rounded-lg border border-border bg-card px-8 py-10 transition-[border-color,box-shadow,transform,translate] duration-500 ease-[cubic-bezier(.22,1,.36,1)] hover:-translate-y-1 hover:border-primary hover:shadow-[0_0_36px_rgba(255,215,0,.12)] motion-reduce:transition-colors motion-reduce:hover:translate-y-0">
+                <span className="font-mono text-[13px] tracking-[.3em] text-primary">
+                  {feature.label}
+                </span>
+                {/*
+                  PC（3 カラム）でのカード内幅は 308.7px。22px だと 02 - REC の
+                  「思いついた瞬間、そのまま録る。」（330px）が入りきらず折り返すため、
+                  lg 以上は 20px（300px）に落として 3 枚とも 1 行に収める。
+                */}
+                <h4 className="text-[22px] font-semibold text-foreground [text-wrap:wrap] lg:text-[20px] lg:[text-wrap:balance]">
+                  {splitTitleByPunctuation(feature.title).map(
+                    (chunk, index) => (
+                      <span
+                        key={`${feature.label}-${index}`}
+                        className="inline-block lg:inline"
+                      >
+                        {chunk}
+                      </span>
+                    ),
+                  )}
+                </h4>
+                <p className="text-[14.5px] leading-[1.9] text-secondary-foreground [text-wrap:pretty]">
+                  {feature.description}
+                </p>
+              </article>
+            </Reveal>
           ))}
         </div>
       </div>

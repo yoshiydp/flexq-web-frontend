@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ColumnRow from "@/components/ui/ColumnRow";
+import Reveal from "@/components/ui/Reveal";
 import SectionBackground from "@/components/ui/SectionBackground";
 import SectionHeader from "@/components/ui/SectionHeader";
 import TutorialRow from "@/components/ui/TutorialRow";
@@ -62,7 +63,7 @@ export default function LearnSection({
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(400px,100%),1fr))] gap-[clamp(48px,6vw,80px)]">
           {/* Tutorial（連載・難易度つき） */}
           {tutorials.length > 0 && (
-            <div className="flex flex-col gap-6">
+            <Reveal className="reveal-up flex flex-col gap-6">
               <ListHeader
                 title="TUTORIAL"
                 subtitle={tutorialSubtitle}
@@ -73,12 +74,12 @@ export default function LearnSection({
                   <TutorialRow key={tutorial.id} tutorial={tutorial} />
                 ))}
               </div>
-            </div>
+            </Reveal>
           )}
 
           {/* Column（読みもの） */}
           {columns.length > 0 && (
-            <div className="flex flex-col gap-6">
+            <Reveal className="reveal-up flex flex-col gap-6" delay={120}>
               <ListHeader
                 title="COLUMN"
                 subtitle={columnSubtitle}
@@ -89,7 +90,7 @@ export default function LearnSection({
                   <ColumnRow key={column.id} column={column} />
                 ))}
               </div>
-            </div>
+            </Reveal>
           )}
         </div>
       </div>

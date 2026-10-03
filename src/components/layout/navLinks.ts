@@ -38,10 +38,11 @@ export function visibleNavLinks({
 export const DOWNLOAD_ANCHOR = "/#download";
 
 /**
- * フッターのみに表示する規約・ポリシーページへのリンク。
- * （Google OAuth 同意画面のブランディング設定が参照する公開 URL）
+ * フッターのみに表示する規約・ポリシー・お問い合わせページへのリンク。
+ * （規約・ポリシーは Google OAuth 同意画面のブランディング設定が参照する公開 URL）
  */
 export const LEGAL_LINKS: readonly NavLink[] = [
   { href: routes.privacyPolicy, label: "PRIVACY POLICY" },
   { href: routes.terms, label: "TERMS" },
+  { href: routes.contact, label: "CONTACT" },
 ];

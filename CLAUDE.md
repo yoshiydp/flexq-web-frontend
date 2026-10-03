@@ -153,6 +153,7 @@ lyrics-web-frontend/
 - `naiveDimensions: true` は必須。`html` が `h-full` で高さ固定のため ResizeObserver ではコンテンツ高の変化（FAQ の開閉・ページ遷移）を検知できず、スクロール下限が古いまま残る
 - アンカー到着後は移動先セクションへフォーカスを移す（`tabindex=-1` を付与・`preventScroll`）。既定のアンカー遷移と同じく、以降の Tab 移動がそのセクションから続くようにするため
 - `stopInertiaOnNavigate: true` + `usePathname` 監視 + `popstate` 監視で、別ページへの遷移・同一ページ内の戻る / 進むの際に慣性を止める（残っていると Lenis が古い目標位置へ動き続け、Next.js の先頭スクロールやブラウザの復元位置を上書きする）
+- ページ遷移を伴わない画面切り替えでプログラムからスクロールする場合（お問い合わせフォームのステップ移動など）は、先に `src/lib/smoothScroll.ts` の `stopScrollInertia()` を呼ぶ（`SmoothScroll` がイベントを受けて慣性を止める）
 - **慣性が動いている最中の `window.scrollTo(..., instant)` は Lenis に上書きされる**（E2E や検証スクリプトで instant スクロールする場合は、慣性が止まってから行う）
 
 ### スクロール連動リビール（Reveal）
@@ -186,8 +187,43 @@ lyrics-web-frontend/
 | `/tutorials/[slug]` | `src/app/tutorials/[slug]/page.tsx` | チュートリアル詳細 |
 | `/columns` | `src/app/columns/page.tsx` | コラム一覧 |
 | `/columns/[slug]` | `src/app/columns/[slug]/page.tsx` | コラム詳細 |
+| `/contact` | `src/app/contact/page.tsx` | お問い合わせフォーム（入力 → 確認 → 完了） |
 
 > `/robots.txt` は `src/app/robots.ts` が生成する（後述の SEO / メタタグを参照）。
+
+### お問い合わせフォーム（/contact）
+
+| ファイル | 役割 |
+|---------|------|
+| `src/components/contact/ContactForm.tsx` | 入力 / 入力確認 / 送信完了の 3 ステップ（クライアント）。目的（プルダウン・必須）/ メールアドレス（必須）/ 本文（必須）/ 添付ファイル（任意・PNG / JPG / PDF・1 ファイル 3MB・3 件・合計 4MB） |
+| `src/app/contact/actions.ts` | Server Action（FormData で受信）。サーバー側で再検証 → スパム判定 → 添付の先頭バイト検査 → メール送信 |
+| `src/lib/contact.ts` | 目的の選択肢・上限・バリデーション（クライアント / サーバー共通） |
+| `src/lib/contactGuard.ts` | スパム対策（ハニーポット・署名付きトークンによる最小入力時間 3 秒 / 有効期限 12 時間・同一内容の連投抑制 10 分）と添付のマジックナンバー検査 |
+| `src/lib/contactDelivery.ts` | 1 件の配送手順: Notion 台帳 → 運営者宛メール（台帳 URL 付き）→ 送信者宛メール。台帳かメールのどちらかが成功すれば完了扱い、両方失敗で例外。送信者宛の失敗は台帳の「控えメール未達」に記録 |
+| `src/lib/contactNotion.ts` | Notion 台帳への書き込み（`@notionhq/client`・添付は File Upload API）。`NOTION_TOKEN` / `NOTION_CONTACT_DATA_SOURCE_ID` が未設定なら無効 |
+| `src/lib/contactMail.ts` | 通知メールの組み立てと送信手段。運営者宛（`contact@flexqstudio.com`・内容 + 添付・reply-to は送信者）と送信者宛（受付完了 + 入力内容の控え）の 2 通。`MailTransport`（1 通の送信手段: `ses` / `resend` / `log`）。SES は nodemailer の SES トランスポート（SES v2・raw MIME）で添付ごと送る |
+
+- 環境変数: `CONTACT_MAIL_PROVIDER`（`ses` / `resend` / `log`。未指定なら `AWS_SES_ACCESS_KEY_ID` → ses、`RESEND_API_KEY` → resend、どちらもなければ開発環境は log・本番はエラー）、`AWS_SES_REGION` / `AWS_SES_ACCESS_KEY_ID` / `AWS_SES_SECRET_ACCESS_KEY`（送信専用 IAM ユーザー。Vercel 予約名の `AWS_ACCESS_KEY_ID` とは別名）、`CONTACT_FROM_EMAIL`（差出人）、`CONTACT_TO_EMAIL`（運営者宛の受信先の上書き。サンドボックスでのテスト用）、`CONTACT_FORM_SECRET`（トークン署名キー。本番では必ず設定する）
+- Notion 台帳: ページ「FlexQ お問い合わせ管理」（https://app.notion.com/p/3ee780496c2f81a7a988f6de784ee75f・運営者と共有する前提でトップレベルに作成）内のデータベース「お問い合わせ一覧」（data source `4a2abac5-74d1-42d8-88eb-cc915ab70f0f`）。プロパティ名は `contactNotion.ts` の `PROP` と一致させる。ステータスは 新着 → 対応中 → 完了（保留 / 迷惑）。書き込みには内部インテグレーションを作成して台帳ページに接続し、`NOTION_TOKEN` に設定する
+- SES の運用: 開発中は**開発者アカウント**（サンドボックス。差出人・宛先とも検証済みアドレスのみ）の送信専用 IAM ユーザーで接続し、リリース前に **運営者アカウント**（本番アクセス承認済み・`noreply@flexqstudio.com` のドメイン検証 / DKIM / DMARC 整備済み）の送信専用 IAM ユーザーへ Vercel の環境変数を差し替える（Preview = staging と Production）。IAM ポリシーは `ses:SendEmail` / `ses:SendRawEmail` のみ・`ses:FromAddress` を差出人に限定する。SAM デプロイ用の `flexq-deploy` キーは流用しない
+- 添付ファイルは保存せずメールに添付して転送するだけ（ストレージ不要）。`next.config.ts` の `serverActions.bodySizeLimit`（5mb）は Vercel の関数上限 4.5MB に合わせたもので、これ以上は増やせない
+- 回数制限（`contactGuard.ts` の `RateLimiter`・Server Action で適用）: 同一 IP 5 回 / 10 分、同一宛先アドレス 3 回 / 10 分、インスタンス全体 60 回 / 時。送信者宛の受付メールを悪用したメール爆撃と送信枠の消費を抑えるため、内容とは独立に縛る。メモリ上の実装でインスタンスをまたぐと効かないため、公開後に悪用が見られたら Vercel Firewall のレート制限（`/contact` への POST）か外部ストアを追加する。同じ内容の同時送信は 1 回の配送にまとめ、配送に失敗した送信は連投扱いにしない
+- スパム対策は外部サービスを使わない方針。bot と判定した送信はエラーを返さず成功画面を出す（対策の存在を悟らせないため）。連投抑制は Lambda インスタンス内のメモリによるベストエフォート
+- Resend を使うには送信ドメイン（flexqstudio.com）の認証レコードを ConoHa の DNS に追加する必要がある
+- Strapi に問い合わせを保存する構成へ移行する場合も、エントリーポイントは Server Action のまま（スパム判定・検証を Next 側に残す）にし、`getContactDelivery` で Strapi へ投稿する `ContactDelivery` に差し替える
+
+---------|------|
+| `src/components/contact/ContactForm.tsx` | 入力 / 入力確認 / 送信完了の 3 ステップ（クライアント） |
+| `src/app/contact/actions.ts` | Server Action。サーバー側で再検証 → スパム判定 → メール送信 |
+| `src/lib/contact.ts` | 目的の選択肢・バリデーション（クライアント / サーバー共通） |
+| `src/lib/contactGuard.ts` | スパム対策（ハニーポット・署名付きトークンによる最小入力時間 3 秒 / 有効期限 12 時間・同一内容の連投抑制 10 分） |
+| `src/lib/contactMail.ts` | `contact@flexqstudio.com` 宛のメール送信（Resend API を fetch で呼ぶ） |
+
+- 環境変数: `CONTACT_MAIL_PROVIDER`（`ses` / `resend` / `log`。未指定なら `AWS_SES_ACCESS_KEY_ID` → ses、`RESEND_API_KEY` → resend、どちらもなければ開発環境は log・本番はエラー）、`AWS_SES_REGION` / `AWS_SES_ACCESS_KEY_ID` / `AWS_SES_SECRET_ACCESS_KEY`（送信専用 IAM ユーザー。Vercel 予約名の `AWS_ACCESS_KEY_ID` とは別名）、`CONTACT_FROM_EMAIL`（差出人）、`CONTACT_TO_EMAIL`（運営者宛の受信先の上書き。サンドボックスでのテスト用）、`CONTACT_FORM_SECRET`（トークン署名キー。本番では必ず設定する）
+- Notion 台帳: ページ「FlexQ お問い合わせ管理」（https://app.notion.com/p/3ee780496c2f81a7a988f6de784ee75f・運営者と共有する前提でトップレベルに作成）内のデータベース「お問い合わせ一覧」（data source `4a2abac5-74d1-42d8-88eb-cc915ab70f0f`）。プロパティ名は `contactNotion.ts` の `PROP` と一致させる。ステータスは 新着 → 対応中 → 完了（保留 / 迷惑）。書き込みには内部インテグレーションを作成して台帳ページに接続し、`NOTION_TOKEN` に設定する
+- SES の運用: 開発中は**開発者アカウント**（サンドボックス。差出人・宛先とも検証済みアドレスのみ）の送信専用 IAM ユーザーで接続し、リリース前に **運営者アカウント**（本番アクセス承認済み・`noreply@flexqstudio.com` のドメイン検証 / DKIM / DMARC 整備済み）の送信専用 IAM ユーザーへ Vercel の環境変数を差し替える（Preview = staging と Production）。IAM ポリシーは `ses:SendEmail` / `ses:SendRawEmail` のみ・`ses:FromAddress` を差出人に限定する。SAM デプロイ用の `flexq-deploy` キーは流用しない
+- スパム対策は外部サービスを使わない方針。bot と判定した送信はエラーを返さず成功画面を出す（対策の存在を悟らせないため）。連投抑制は Lambda インスタンス内のメモリによるベストエフォート
+- Resend を使うには送信ドメイン（flexqstudio.com）の認証レコードを ConoHa の DNS に追加する必要がある
 
 ---
 

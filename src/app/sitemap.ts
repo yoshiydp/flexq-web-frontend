@@ -19,6 +19,7 @@ const STATIC_PATHS = [
   routes.columns,
   routes.terms,
   routes.privacyPolicy,
+  routes.contact,
 ];
 
 // ISR: 記事の追加は最長 60 秒で sitemap に反映される（各ページと同じ間隔）

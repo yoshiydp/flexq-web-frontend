@@ -12,4 +12,5 @@ export const routes = {
   column: (slug: string) => `/columns/${slug}`,
   privacyPolicy: "/privacy-policy",
   terms: "/terms",
+  contact: "/contact",
 } as const;

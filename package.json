@@ -14,7 +14,9 @@
     "e2e:record": "RECORD_VIDEO=1 playwright test e2e/features-linebreak.spec.ts --project=desktop && ffmpeg -y -loglevel error -i test-results/video/features-linebreak.webm -c:v libx264 -pix_fmt yuv420p -movflags +faststart test-results/video/features-linebreak.mov"
   },
   "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.1146.0",
     "@base-ui/react": "^1.6.0",
+    "@notionhq/client": "^5.27.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.0.0-rc.10",
     "@strapi/blocks-react-renderer": "^1.0.2",
@@ -24,6 +26,7 @@
     "lenis": "^1.3.26",
     "lucide-react": "^1.21.0",
     "next": "16.2.9",
+    "nodemailer": "^10.0.13",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "tailwind-merge": "^3.6.0",
@@ -38,6 +41,7 @@
     "@testing-library/react": "^16.3.2",
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

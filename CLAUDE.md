@@ -209,6 +209,7 @@ lyrics-web-frontend/
 - 添付ファイルは保存せずメールに添付して転送するだけ（ストレージ不要）。`next.config.ts` の `serverActions.bodySizeLimit`（5mb）は Vercel の関数上限 4.5MB に合わせたもので、これ以上は増やせない
 - 回数制限（`contactGuard.ts` の `RateLimiter`・Server Action で適用）: 同一 IP 5 回 / 10 分、同一宛先アドレス 3 回 / 10 分、インスタンス全体 60 回 / 時。送信者宛の受付メールを悪用したメール爆撃と送信枠の消費を抑えるため、内容とは独立に縛る。メモリ上の実装でインスタンスをまたぐと効かないため、公開後に悪用が見られたら Vercel Firewall のレート制限（`/contact` への POST）か外部ストアを追加する。同じ内容の同時送信は 1 回の配送にまとめ、配送に失敗した送信は連投扱いにしない
 - スパム対策は外部サービスを使わない方針。bot と判定した送信はエラーを返さず成功画面を出す（対策の存在を悟らせないため）。連投抑制は Lambda インスタンス内のメモリによるベストエフォート
+- 運営者アカウントの SES への切り替え（`scripts/setup-contact-mail-ses.sh`）・公開・キーの再発行・トラブルシューティングは `docs/contact-form-operations.md` を参照
 - Resend を使うには送信ドメイン（flexqstudio.com）の認証レコードを ConoHa の DNS に追加する必要がある
 - Strapi に問い合わせを保存する構成へ移行する場合も、エントリーポイントは Server Action のまま（スパム判定・検証を Next 側に残す）にし、`getContactDelivery` で Strapi へ投稿する `ContactDelivery` に差し替える
 

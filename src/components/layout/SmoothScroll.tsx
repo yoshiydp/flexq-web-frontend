@@ -3,6 +3,7 @@
 import Lenis from "lenis";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
+import { STOP_INERTIA_EVENT } from "@/lib/smoothScroll";
 
 /**
  * ページ全体のスクロールに慣性を付ける（Lenis）。
@@ -78,11 +79,17 @@ export default function SmoothScroll() {
     // popstate で慣性を止めてブラウザの復元位置に同期させる
     const onPopState = () => stopInertia(lenis);
 
+    // ページ遷移を伴わない画面切り替え（お問い合わせフォームのステップ移動など）が
+    // プログラムからスクロールする前に、進行中の慣性を止めるための窓口
+    const onStopInertia = () => stopInertia(lenis);
+
     document.addEventListener("click", onClick);
     window.addEventListener("popstate", onPopState);
+    window.addEventListener(STOP_INERTIA_EVENT, onStopInertia);
     return () => {
       document.removeEventListener("click", onClick);
       window.removeEventListener("popstate", onPopState);
+      window.removeEventListener(STOP_INERTIA_EVENT, onStopInertia);
       lenis.destroy();
       lenisRef.current = null;
     };

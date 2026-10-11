@@ -24,6 +24,8 @@ export type AppScreen = {
 export type FaqItem = {
   question: string;
   answer: string;
+  /** 回答の下に表示する関連ページへのリンク（サイト内パス） */
+  link?: { href: string; label: string };
 };
 
 export type CtaContent = {

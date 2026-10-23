@@ -533,7 +533,7 @@ master
 ```bash
 # 1. develop から feature ブランチを切る
 git checkout develop
-git checkout -b feature/xxx
+git checkout -b feature/WEB-X-brief-description   # WEB-X は Notion「Web タスク一覧」の ID
 
 # 2. 実装・コミット
 
@@ -669,3 +669,56 @@ Strapi Cloud が基本有料のため、**本番 CMS の接続は当面見送り
 2. ホスティング側の env に `FRONTEND_URLS=https://flexqstudio.com` を設定（CORS）
 3. Vercel の Production 環境変数 `NEXT_PUBLIC_STRAPI_URL` に CMS の URL を設定 → **Redeploy**
 4. 管理画面で本番コンテンツ（記事・CTA のストア URL・アプリスクリーンショット）を投入 → ISR（60 秒）で反映
+
+---
+
+## タスク管理（Notion × GitHub 連携）
+
+Web（このリポジトリ）のタスクは、モバイルアプリ（flexq-mobile・`TASK-X`）とは**別の Notion データベース**で管理する（2026-10-23 に分離）。Claude Code からは `/notion` スラッシュコマンド（`.claude/commands/notion.md`）で操作する。
+
+### Notion データベース
+
+- **場所**: FlexQ タスク管理 > Web タスク一覧
+- **URL**: https://www.notion.so/7dc1d4159dd34470a0134049d63bb280
+- **データソース ID**: `collection://af4fd95e-1708-4b0d-a917-ca302418aa3c`
+
+| プロパティ | 型 | 内容 |
+|-----------|-----|------|
+| リリース | チェックボックス | 未リリース分の目印。staging の Preview で動作確認がとれた時点で ON、staging → master のリリース PR マージで OFF に戻す |
+| タイトル | テキスト | タスク名 |
+| ID | テキスト | `WEB-X`（連番。モバイルの `TASK-X` とは独立） |
+| 簡単な詳細 | テキスト | 概要（1 行） |
+| 優先度 | セレクト | Low / Middle / High |
+| ステータス | ステータス | Not started / In progress / Done / Pending |
+| GitHub PR | URL | 対応する PR の URL |
+| 備考 | テキスト | 補足メモ |
+
+モバイルの DB にある「デバイス」プロパティは Web には無い。
+
+### ブランチ・コミットの命名
+
+- ブランチ名は `feature/WEB-X-brief-description`（Notion の ID を冒頭に付ける）
+- コミットタイトルは英語の Conventional Commits 形式で、末尾に `(WEB-X)` を付ける。本文は日本語で背景・対応内容を書く
+
+### /notion の使い方
+
+```
+/notion タスクを追加して
+タイトル：〇〇〇
+詳細：〇〇〇〇
+優先度：High
+
+/notion WEB-X を In progress にして      # 作業開始時
+/notion WEB-X に PR URL を登録して <URL>  # PR 作成時
+/notion WEB-X をリリース済みにして       # staging で確認がとれた時点（Done + リリース ON）
+/notion WEB-X を Done にして             # ステータスのみ更新する場合
+```
+
+リリース PR（staging → master）をマージしたら、対象タスクの「リリース」チェックを OFF に戻す（ステータスは Done のまま）。
+
+### スラッシュコマンド一覧
+
+| コマンド | 定義ファイル | 用途 |
+|----------|-------------|------|
+| `/notion` | `.claude/commands/notion.md` | Web タスクの追加・更新・PR URL 登録・リリースフラグ |
+| `/codex-review` | `.claude/commands/codex-review.md` | Codex CLI でコードレビュー実行 + 指摘対応 |

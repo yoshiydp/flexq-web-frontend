@@ -28,7 +28,12 @@ yarn test src/components/ui/StoreLinks.test.tsx
 yarn e2e                  # 全フロー（desktop / mobile 両プロジェクト）
 yarn e2e:ui               # UI モードでデバッグ実行
 npx playwright test e2e/top-page.spec.ts   # 単一フロー
+npx playwright test --grep @CT             # セクション単位（docs/test-cases.md のセクション ID）
+npx playwright test --grep "CT-04 "        # ケース単位
 ```
+
+PR（develop / staging / master 向け）と各ブランチへの push では、GitHub Actions（`.github/workflows/ci.yml`）が
+型チェック → Lint → Jest → ビルド → E2E を自動で実行する。
 
 開発サーバー: `http://localhost:3000`
 
@@ -46,7 +51,7 @@ npx playwright test e2e/top-page.spec.ts   # 単一フロー
 | UI コンポーネント | shadcn/ui（style: base-nova） |
 | ホスティング | Vercel |
 | CMS / API | Strapi v5（lyrics-web-strapi） |
-| ランタイム | Node.js v22 |
+| ランタイム | Node.js v24（`.nvmrc` = 24.22.1・`package.json` の `engines` で 24.x に固定） |
 | パッケージマネージャー | Yarn |
 
 ### 関連リポジトリ
@@ -62,7 +67,7 @@ npx playwright test e2e/top-page.spec.ts   # 単一フロー
 
 ### 前提条件
 
-- Node.js v22 以上
+- Node.js v24（`nvm use` で `.nvmrc` のバージョンに切り替わる。Node.js 20 は EOL）
 - Yarn
 - `lyrics-web-strapi` がローカルで起動済み（`http://localhost:1337`）
   - Strapi 側で Content API のパブリック権限を設定済みであること（詳細は lyrics-web-strapi の CLAUDE.md 参照）
@@ -86,10 +91,10 @@ NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
 ### 依存関係インストール
 
 ```bash
-yarn install --ignore-engines
+yarn install
 ```
 
-> Node.js v22.11.0 で eslint-visitor-keys の engines 制約が発生するため `--ignore-engines` を付けています。
+> 以前は Node.js v22.11.0 で eslint-visitor-keys の engines 制約が発生するため `--ignore-engines` を付けていましたが、Node.js v24 では不要です（engines 制約で止まる場合だけ付ける）。
 
 ### 開発サーバー起動
 
@@ -188,6 +193,8 @@ lyrics-web-frontend/
 | `/columns` | `src/app/columns/page.tsx` | コラム一覧 |
 | `/columns/[slug]` | `src/app/columns/[slug]/page.tsx` | コラム詳細 |
 | `/contact` | `src/app/contact/page.tsx` | お問い合わせフォーム（入力 → 確認 → 完了） |
+| （404） | `src/app/not-found.tsx` | 存在しない URL・記事（PAGE NOT FOUND） |
+| （エラー） | `src/app/error.tsx` | 描画中の例外（PAGE COULD NOT BE LOADED）。CMS 停止中の記事詳細はここに来る（実在記事を 404 と誤判定しないため。`fetchCollectionOrThrow`） |
 
 > `/robots.txt` は `src/app/robots.ts` が生成する（後述の SEO / メタタグを参照）。
 
@@ -489,21 +496,42 @@ import { cn } from "@/lib/utils";
 - データ層（`src/lib/content.ts`）のテストは `global.fetch` をモックして行う（実 Strapi には接続しない）
 - リンクテキストが `&nbsp;` 区切りの要素（例: `VIEW ALL →`）は正規表現 `\s` でマッチさせる
 
+### テストケース（docs/test-cases.md）
+
+確認すべき項目の一覧は **`docs/test-cases.md` を正**とする（flexq-mobile の `docs/test-cases.md` と同じ運用）。
+画面・機能ごとのセクション（TP / NV / FQ / AR / ER / CT / LG / SE / RS / FX / RL）に、ケース ID・前提条件・手順・期待結果・区分（自動 / 手動）・対応 spec を書いている。
+
+- **自動ケースは E2E のテストと 1 対 1 で対応させる。** テスト名の先頭にケース ID を付け（例: `test("CT-04 確認画面に…", ...)`）、describe にセクションのタグ（例: `{ tag: "@CT" }`）を付ける。spec にあってケースにないテスト・ケースにあって spec にない自動ケースを残さない
+- ケースを追加・変更したら、spec のテスト名と `docs/test-cases.md` の両方を同じ PR で直す
+- 例外は `features-linebreak.spec.ts` の README 素材生成（`@record` タグ）2 本だけ。検証ではないため ID を付けず、`playwright.config.ts` の `grepInvert` で通常の `yarn e2e` / CI から外している（`yarn e2e:record` のときだけ実行）
+- 手動ケース（外部サービスへの実送信・Strapi 稼働時・実機の見た目・staging / 本番での確認）は E2E にしない。ライブラリ更新時に staging で最低限見るケースは ★ 付き（`docs/test-cases.md` の「はじめに」）
+
 ### E2E テスト（Playwright）※ flexq-mobile の Maestro に相当
 
-フローは `e2e/*.spec.ts` に配置します。`desktop` / `mobile`（iPhone 14 ビューポート）の 2 プロジェクトで全フローが実行されます。
+フローは `e2e/*.spec.ts` に配置します。`desktop` / `mobile`（iPhone 14 ビューポート）の 2 プロジェクトで全フローが実行されます（`seo.spec.ts` は表示幅に依存しないため desktop のみ）。
 
 **実行前提:**
 - `yarn build` 済みであること（`playwright.config.ts` の webServer が `yarn start --port 3200` を自動起動・終了する）
 - 起動済みサーバーを流用する場合は `PLAYWRIGHT_BASE_URL=http://localhost:3000 yarn e2e`
-- Strapi（localhost:1337）は**起動していなくてもよい**。トップページはフォールバック文言で描画され、記事フローはデータがなければ空状態を検証する設計
+- Strapi（localhost:1337）は**起動していなくてもよい**。トップページはフォールバック文言で描画され、記事フローはデータがなければ空状態を検証する設計（Strapi 未起動時は WebServer のログに `fetch failed` が出るが想定どおり）
 - 初回のみ `npx playwright install chromium` が必要
 
+**CI（GitHub Actions）:**
+- `.github/workflows/ci.yml` が PR（develop / staging / master 向け）と、それらのブランチへの push で実行される。Node は `.nvmrc`、`yarn install --frozen-lockfile` → `npx tsc --noEmit` → `yarn lint` → `yarn test:ci` → `yarn build` → `npx playwright install --with-deps chromium` → `yarn e2e`
+- `CI=true` では Playwright がリトライ 2 回・`test.only` 禁止・webServer を毎回起動し直す。レポーターは GitHub の注釈 + HTML。失敗時は `playwright-report/` と `test-results/`（トレース・スクリーンショット）がアーティファクトとして 14 日残る
+- Strapi・Notion・SES の値は CI に入れない（未設定でもビルドと E2E が通る。お問い合わせの E2E は「送信する」を押さない）。ローカルで CI と同じ条件にするには `.env.local` を外して `CI=true` で実行する
+- 通常のスキップ（8 件）: SP 専用 / PC 専用のケースがもう一方のプロジェクトで、ER-02（Strapi 稼働時のみ）が両プロジェクトでスキップになる
+
 **フロー作成時のルール:**
+- テスト名・タグは「テストケース」の節のとおり ID で揃える
 - ロケーターはセクションにスコープする（例: `page.locator("#faq").getByText(...)`）。同一文言が News 抜粋と FAQ 回答など複数箇所に存在し得るため
 - ビューポート依存の UI（PC ナビ / SP メニュー）は `test.skip(isMobile, ...)` / `test.skip(!isMobile, ...)` で分岐する
-- SP メニューのオーバーレイは `data-testid="mobile-menu"` で特定する
-- CMS データに依存するアサーションは「データあり / 空状態」のどちらでも成立するように書く
+- SP メニューのオーバーレイは `data-testid="mobile-menu"`、エラーページは `data-testid="error-page"` で特定する
+- CMS データに依存するアサーションは「データあり / 空状態」のどちらでも成立するように書く。どちらかでしか成立しないケースは `test.skip(条件, 理由)` で明示する（ER-02 / ER-03）
+- クライアントコンポーネントを操作する前に `e2e/helpers.ts` の `waitForHydration()` で React のハイドレーションを待つ（`page.goto` 直後はハンドラが付いておらず、クリックが空振りする）
+- リビール（`reveal-up`）の中の小さな要素をクリックするときは `scrollIntoViewAndWaitForReveal()` で動きが止まるのを待つ（画面に入った瞬間に 28px 動くため座標がずれる）
+- お問い合わせの「送信する」は押さない（ローカルの `.env.local` に SES / Notion の値があると実際に配送される）
+- Next.js のルートアナウンサー（`#__next-route-announcer__`）も `role="alert"` を持つため、エラー文言は `page.getByRole("main").getByRole("alert")` のように絞る
 
 ### コードレビュー（Codex CLI）
 
@@ -639,12 +667,17 @@ echo "https://your-strapi-prod.strapiapp.com" | vercel env add NEXT_PUBLIC_STRAP
 
 ### デプロイ前チェック
 
+PR では GitHub Actions（`.github/workflows/ci.yml`）が同じ内容を自動で実行する。ローカルで確認する場合:
+
 ```bash
+npx tsc --noEmit  # 型チェック
 yarn lint      # Lint エラーがないか確認
 yarn test:ci   # ユニットテストが通るか確認
 yarn build     # ビルドエラーがないか確認
 yarn e2e       # E2E が通るか確認（build 後に実行）
 ```
+
+依存ライブラリを更新したときは、staging の Preview で `docs/test-cases.md` の ★ 付きケースを目視する。
 
 ---
 

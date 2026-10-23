@@ -305,8 +305,9 @@ $ curl https://flexqstudio.com/sitemap.xml
 
 ### 別途対応
 
-- [ ] Node バージョンの不一致（`.nvmrc` は `22`、Vercel は `24.x`、`package.json` に `engines` 指定なし）。
-      ローカルは `yarn install --ignore-engines` で回避している
+- [x] Node バージョンの不一致（`.nvmrc` は `22`、Vercel は `24.x`、`package.json` に `engines` 指定なし）
+      → WEB-1（2026-10-23）で `.nvmrc` を `24.22.1`、`package.json` に `"engines": { "node": "24.x" }` を追加して Vercel と揃えた。
+      Node.js 24 では `yarn install --ignore-engines` も不要
 
 ---
 

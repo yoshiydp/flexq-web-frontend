@@ -107,8 +107,8 @@
 
 | 項目 | バージョン / 内容 |
 | --- | --- |
-| フレームワーク | Next.js 16.2.9（App Router・ISR） |
-| React | 19.2.4 |
+| フレームワーク | Next.js 16.4.2（App Router・ISR） |
+| React | 19.3.1 |
 | 言語 | TypeScript 5 |
 | スタイリング | Tailwind CSS v4 |
 | UI コンポーネント | shadcn/ui（style: `base-nova`）/ @base-ui/react / lucide-react |
@@ -116,7 +116,7 @@
 | 慣性スクロール | Lenis |
 | CMS / API | Strapi v5（[lyrics-web-strapi](https://github.com/yoshiydp/lyrics-web-strapi)）※ 現在は休止中 |
 | ホスティング | Vercel（プロジェクト `flexq-web`） |
-| Node.js | 22（`.nvmrc`） |
+| Node.js | 24（`.nvmrc` = 24.22.1。`package.json` の `engines` で 24.x に固定） |
 | パッケージマネージャー | Yarn 1.22（Classic） |
 
 ### 開発ツール
@@ -192,8 +192,10 @@
 │   ├── badges/                  # App Store / Google Play の公式バッジ
 │   ├── bg-*.png                 # 各セクションの背景
 │   └── og.png                   # OG 画像（1200x630）
-├── e2e/                         # Playwright のフロー
+├── e2e/                         # Playwright のフロー（テスト名の先頭が docs/test-cases.md のケース ID）
+├── .github/workflows/ci.yml     # PR ごとの型チェック・Lint・Jest・ビルド・E2E
 ├── docs/
+│   ├── test-cases.md            # 動作確認のテストケース（自動 / 手動）
 │   ├── custom-domain-and-release.md   # 独自ドメイン構成と公開までの手順
 │   └── readme/                  # この README で使う画像
 └── CLAUDE.md                    # 実装上の注意点（スクロール演出・SEO・WebGL など）
@@ -205,7 +207,7 @@
 
 ### 前提条件
 
-- Node.js 22（`nvm use` で `.nvmrc` のバージョンに切り替わります）
+- Node.js 24（`nvm use` で `.nvmrc` のバージョンに切り替わります。Node.js 20 は EOL のため使わない）
 - Yarn 1.22（Classic）
 - **Strapi は起動していなくても動きます。** CMS に繋がらない場合、トップページはフォールバック文言で描画され、記事一覧は空状態になります。記事ページまで確認したいときだけ [lyrics-web-strapi](https://github.com/yoshiydp/lyrics-web-strapi) を `http://localhost:1337` で起動してください
 
@@ -215,14 +217,14 @@
 git clone git@github.com:yoshiydp/flexq-web-frontend.git
 cd flexq-web-frontend
 
-yarn install --ignore-engines
+yarn install
 cp .env.local.example .env.local
 yarn dev
 ```
 
 `http://localhost:3000` で開きます。
 
-> `--ignore-engines` は、Node.js 22 で一部の依存（eslint-visitor-keys）の `engines` 制約に掛かるのを避けるために付けています。
+> 以前は Node.js 22 で一部の依存（eslint-visitor-keys）の `engines` 制約に掛かるため `yarn install --ignore-engines` としていましたが、Node.js 24 では不要です（`engines` 制約で止まる場合だけ `--ignore-engines` を付けてください）。
 
 ### 環境変数
 
@@ -343,12 +345,22 @@ yarn e2e                          # desktop / mobile（iPhone 14 ビューポー
 npx playwright test e2e/top-page.spec.ts   # 単一フロー
 ```
 
-| フロー | 検証内容 |
-| --- | --- |
-| `e2e/top-page.spec.ts` | ヒーロー・主要セクションの描画、FAQ の開閉、ストアバッジ、アンカー遷移 |
-| `e2e/mobile-menu.spec.ts` | SP メニューの開閉とメニュー内のストアバッジ |
-| `e2e/articles.spec.ts` | 記事一覧 → 詳細の遷移、存在しない記事の 404 |
-| `e2e/features-linebreak.spec.ts` | 3 CORE FEATURES の見出しの改行位置（PC / TB / SP） |
+確認項目の一覧は [`docs/test-cases.md`](docs/test-cases.md) です。E2E のテスト名の先頭にケース ID（例: `CT-04`）を付けて、自動で確認するケースと 1 対 1 で対応させています。見た目・実送信・実機など E2E にできないケースは「手動」として同じ文書に載せています。
+
+| フロー | ケース | 検証内容 |
+| --- | --- | --- |
+| `e2e/top-page.spec.ts` | TP | ヒーロー・主要セクション・SCROLL・APP PREVIEW（SP）・ストアバッジ・NEWS / LEARN とナビの整合・フッター |
+| `e2e/features-linebreak.spec.ts` | TP-04 | 3 CORE FEATURES の見出しの改行位置（PC / TB / SP） |
+| `e2e/navigation.spec.ts` | NV | PC ナビ・DOWNLOAD・サブページからトップのセクションへの移動 |
+| `e2e/mobile-menu.spec.ts` | NV | SP メニューの開閉とメニュー内のストアバッジ |
+| `e2e/faq.spec.ts` | FQ | FAQ の開閉・キーボード操作・回答内のリンク |
+| `e2e/articles.spec.ts` | AR | 記事一覧 → 詳細の遷移（CMS が空なら空状態） |
+| `e2e/errors.spec.ts` | ER | 404 ページ、CMS 停止中の記事詳細のエラーページ |
+| `e2e/contact.spec.ts` | CT | お問い合わせの入力検証・確認画面・添付ファイル（送信はしない） |
+| `e2e/legal.spec.ts` | LG | 利用規約・プライバシーポリシーの表示とリンク |
+| `e2e/seo.spec.ts` | SE | robots.txt・sitemap.xml・noindex・title / OGP・OG 画像・構造化データ |
+| `e2e/responsive.spec.ts` | RS | ヘッダーの切り替え・横スクロールが出ないこと |
+| `e2e/effects.spec.ts` | FX | リビール・動きを減らす設定・JS 無効時・WebGL キャンバス |
 
 - Strapi は起動していなくても通ります（CMS に依存するアサーションは、データあり / 空状態のどちらでも成立するように書いています）
 - 起動済みのサーバーを使う場合は `PLAYWRIGHT_BASE_URL=http://localhost:3000 yarn e2e`
@@ -373,10 +385,10 @@ feature/* ──PR──▶ develop ──直接マージ──▶ staging ─�
 
 - **`master` へマージする前に、必ず `staging` の Preview で目視確認します。** `master` へのマージは即座に本番へ反映されます
 - Preview は Vercel Authentication で保護されています（ログイン済みのブラウザでのみ閲覧可）。meta タグや `robots.txt` を機械的に確認したいときは、ローカルで `yarn build && yarn start` します
-- CI のワークフローはありません。マージ前にローカルで次を通します
+- PR（`develop` / `staging` / `master` 向け）と各ブランチへの push で、GitHub Actions（`.github/workflows/ci.yml`）が型チェック・Lint・Jest・ビルド・E2E を実行します。ローカルで同じことをするには次を通します
 
 ```bash
-yarn lint && yarn test:ci && yarn build && yarn e2e
+npx tsc --noEmit && yarn lint && yarn test:ci && yarn build && yarn e2e
 ```
 
 ### 配信構成
@@ -408,4 +420,5 @@ Preview デプロイ（feature / staging）は、公開後も常に `noindex` �
 | ドキュメント | 内容 |
 | --- | --- |
 | [`CLAUDE.md`](CLAUDE.md) | 実装上の注意点（慣性スクロール・リビール・SEO / メタタグ・WebGL キービジュアル・カラーパレット・テストの書き方） |
+| [`docs/test-cases.md`](docs/test-cases.md) | 動作確認のテストケース（E2E で自動確認するものと手動確認するもの・ライブラリ更新時に staging で見るケース） |
 | [`docs/custom-domain-and-release.md`](docs/custom-domain-and-release.md) | 独自ドメインの構成・DNS・検索エンジンからのブロック・公開までのチェックリスト |

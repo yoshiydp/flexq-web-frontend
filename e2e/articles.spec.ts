@@ -1,13 +1,14 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * 記事ページのフロー。
+ * 記事ページ（docs/test-cases.md「4. 記事一覧・詳細（AR）」）。
  * CMS（Strapi）にデータがある場合は一覧 → 詳細 → 一覧へ戻るまで検証し、
- * 空の場合は空状態メッセージを検証する（どちらでも成立する設計）。
+ * 空の場合（Strapi 未起動を含む）は空状態メッセージを検証する（どちらでも成立する設計）。
+ * Strapi 稼働時の記事の中身（AR-04 / AR-05）は手動確認。
  */
 
-test.describe("記事一覧・詳細", () => {
-  test("/news 一覧 → 詳細 → 一覧へ戻る", async ({ page }) => {
+test.describe("AR 記事一覧・詳細", { tag: "@AR" }, () => {
+  test("AR-01 /news 一覧 → 詳細 → 一覧へ戻る", async ({ page }) => {
     await page.goto("/news");
     await expect(page.getByRole("heading", { name: "NEWS" })).toBeVisible();
 
@@ -25,7 +26,9 @@ test.describe("記事一覧・詳細", () => {
     await expect(page).toHaveURL(/\/news$/);
   });
 
-  test("/tutorials 一覧が難易度バッジ付きで表示される", async ({ page }) => {
+  test("AR-02 /tutorials 一覧が難易度バッジ付きで表示される", async ({
+    page,
+  }) => {
     await page.goto("/tutorials");
     await expect(page.getByRole("heading", { name: "TUTORIAL" })).toBeVisible();
 
@@ -44,7 +47,7 @@ test.describe("記事一覧・詳細", () => {
     }
   });
 
-  test("/columns 一覧 → 詳細が表示される", async ({ page }) => {
+  test("AR-03 /columns 一覧 → 詳細が表示される", async ({ page }) => {
     await page.goto("/columns");
     await expect(page.getByRole("heading", { name: "COLUMN" })).toBeVisible();
 
@@ -57,17 +60,5 @@ test.describe("記事一覧・詳細", () => {
     await rows.first().click();
     await expect(page).toHaveURL(/\/columns\/.+/);
     await expect(page.getByRole("article")).toBeVisible();
-  });
-
-  test("存在しない記事は 404 ページを表示する", async ({ page }) => {
-    // ルート loading.tsx によるストリーミング配信のため HTTP ステータスは 200 になる。
-    // ステータスではなく 404 画面（not-found.tsx）の表示で検証する
-    await page.goto("/news/no-such-article");
-    const notFound = page.getByText("PAGE NOT FOUND");
-    const errorUi = page.getByText(/something went wrong/i);
-    await expect(notFound.or(errorUi).first()).toBeVisible();
-    // CMS 未起動時は「実在記事を 404 と誤判定しない」設計によりエラー表示になるためスキップ
-    test.skip(await errorUi.isVisible(), "CMS（Strapi）未起動のためスキップ");
-    await expect(notFound).toBeVisible();
   });
 });

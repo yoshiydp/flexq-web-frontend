@@ -4,13 +4,16 @@ import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 /**
- * 3 CORE FEATURES の見出しの改行位置のフロー。
+ * 3 CORE FEATURES の見出しの改行位置のフロー（docs/test-cases.md の TP-04）。
  *
- * - 改行位置の検証は通常の `yarn e2e` で実行される
+ * - 改行位置の検証（TP-04）は通常の `yarn e2e` で実行される
  * - PC / TB / SP のスクリーンショットと、幅をリアルタイムに可変させた
  *   スクリーンレコードの生成は `yarn e2e:record`（RECORD_VIDEO=1）のときのみ実行される
  *   出力: test-results/video/features-linebreak.mov（および .webm）
  *         test-results/screenshots/features-{pc,tablet,sp}.png
+ * - 生成用の 2 本は検証ではなく README 用の素材づくりのため、テストケース（ID）とは対応させない。
+ *   `@record` タグを付け、playwright.config.ts の grepInvert で通常の実行・CI の対象から外している
+ *   （skip として結果に残さないため。RECORD_VIDEO=1 のときだけ対象になる）
  */
 
 const OUT_DIR = path.join(process.cwd(), "test-results", "video");
@@ -82,9 +85,9 @@ function descendingWidths(): number[] {
   return [...steps].sort((a, b) => b - a);
 }
 
-test("見出しは lg 未満では読点で改行され、lg 以上は従来どおり", async ({
-  page,
-}) => {
+const TP04 = "TP-04 見出しは lg 未満では読点で改行され、lg 以上は balance で折り返す";
+
+test(TP04, { tag: "@TP" }, async ({ page }) => {
   test.skip(
     test.info().project.name !== "desktop",
     "幅を直接変えて検証するため desktop プロジェクトでのみ実行する",
@@ -100,13 +103,28 @@ test("見出しは lg 未満では読点で改行され、lg 以上は従来ど�
     );
   }
 
-  // lg 以上は text-wrap: balance に任せる（句の途中で改行され得る）
+  // lg 以上は読点ごとの inline-block を外して text-wrap: balance に任せる。
+  // balance の折り返し位置は日本語のフォールバックフォント（macOS / Linux で異なる）に左右されるため、
+  // 改行位置そのものではなく「読点改行の仕組みが外れ、balance が効いていること」を検証する
   await page.setViewportSize({ width: 1024, height: 1000 });
-  const atLg = await readHeadingLines(page);
-  expect(atLg[0]).toEqual(["作りたい場所", "へ、ワンタップ。"]);
+  const atLg = await page.$$eval("#features h4", (els) =>
+    els.map((el) => ({
+      textWrap: getComputedStyle(el).textWrapStyle || getComputedStyle(el).textWrap,
+      chunkDisplays: [...el.querySelectorAll("span")].map(
+        (span) => getComputedStyle(span).display,
+      ),
+    })),
+  );
+  expect(atLg).toHaveLength(3);
+  for (const heading of atLg) {
+    expect(heading.textWrap).toContain("balance");
+    expect(heading.chunkDisplays.every((d) => d === "inline")).toBe(true);
+  }
 });
 
-test("PC / TB / SP のスクリーンショットを生成する", async ({ browser }) => {
+test("PC / TB / SP のスクリーンショットを生成する", { tag: "@record" }, async ({
+  browser,
+}) => {
   test.skip(
     test.info().project.name !== "desktop",
     "幅を直接指定するため desktop プロジェクトでのみ実行する",
@@ -152,7 +170,7 @@ test("PC / TB / SP のスクリーンショットを生成する", async ({ brow
   }
 });
 
-test("幅を可変させた録画を生成する", async ({ browser }) => {
+test("幅を可変させた録画を生成する", { tag: "@record" }, async ({ browser }) => {
   test.skip(
     test.info().project.name !== "desktop",
     "録画フローは desktop プロジェクトでのみ実行する",

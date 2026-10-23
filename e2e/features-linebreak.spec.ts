@@ -103,10 +103,23 @@ test(TP04, { tag: "@TP" }, async ({ page }) => {
     );
   }
 
-  // lg 以上は text-wrap: balance に任せる（句の途中で改行され得る）
+  // lg 以上は読点ごとの inline-block を外して text-wrap: balance に任せる。
+  // balance の折り返し位置は日本語のフォールバックフォント（macOS / Linux で異なる）に左右されるため、
+  // 改行位置そのものではなく「読点改行の仕組みが外れ、balance が効いていること」を検証する
   await page.setViewportSize({ width: 1024, height: 1000 });
-  const atLg = await readHeadingLines(page);
-  expect(atLg[0]).toEqual(["作りたい場所", "へ、ワンタップ。"]);
+  const atLg = await page.$$eval("#features h4", (els) =>
+    els.map((el) => ({
+      textWrap: getComputedStyle(el).textWrapStyle || getComputedStyle(el).textWrap,
+      chunkDisplays: [...el.querySelectorAll("span")].map(
+        (span) => getComputedStyle(span).display,
+      ),
+    })),
+  );
+  expect(atLg).toHaveLength(3);
+  for (const heading of atLg) {
+    expect(heading.textWrap).toContain("balance");
+    expect(heading.chunkDisplays.every((d) => d === "inline")).toBe(true);
+  }
 });
 
 test("PC / TB / SP のスクリーンショットを生成する", { tag: "@record" }, async ({

@@ -50,7 +50,7 @@ PR（develop / staging / master 向け）と各ブランチへの push では、
 | スタイリング | Tailwind CSS v4 |
 | UI コンポーネント | shadcn/ui（style: base-nova） |
 | ホスティング | Vercel |
-| CMS / API | Strapi v5（lyrics-web-strapi） |
+| CMS / API | Strapi v5（lyrics-web-strapi）※ 現在は休止中。本番は `src/content/fallbacks.ts` の文言による静的 LP として動き、記事ページへの導線は非表示 |
 | ランタイム | Node.js v24（`.nvmrc` = 24.22.1・`package.json` の `engines` で 24.x に固定） |
 | パッケージマネージャー | Yarn |
 
@@ -58,7 +58,7 @@ PR（develop / staging / master 向け）と各ブランチへの push では、
 
 | リポジトリ | 役割 |
 |-----------|------|
-| `lyrics-web-frontend`（本リポジトリ） | Next.js フロントエンド |
+| `flexq-web-frontend`（本リポジトリ。旧 `lyrics-web-frontend`。GitHub が旧 URL をリダイレクトし、ローカルのディレクトリ名・`package.json` の `name` には旧名が残る） | Next.js フロントエンド |
 | `lyrics-web-strapi` | Headless CMS バックエンド（Strapi v5） |
 
 ---
@@ -69,8 +69,9 @@ PR（develop / staging / master 向け）と各ブランチへの push では、
 
 - Node.js v24（`nvm use` で `.nvmrc` のバージョンに切り替わる。Node.js 20 は EOL）
 - Yarn
-- `lyrics-web-strapi` がローカルで起動済み（`http://localhost:1337`）
-  - Strapi 側で Content API のパブリック権限を設定済みであること（詳細は lyrics-web-strapi の CLAUDE.md 参照）
+- （記事ページを確認する場合のみ）`lyrics-web-strapi` がローカルで起動済み（`http://localhost:1337`）
+  - CMS は休止中のため通常は不要。Strapi が無くてもトップ・お問い合わせ・規約は動き、ビルドと E2E も通る（記事一覧は空状態、記事詳細はエラー画面になる）
+  - 起動する場合は Strapi 側で Content API のパブリック権限を設定済みであること（詳細は lyrics-web-strapi の CLAUDE.md 参照）
 
 ### 環境変数
 
@@ -194,7 +195,7 @@ lyrics-web-frontend/
 | `/columns/[slug]` | `src/app/columns/[slug]/page.tsx` | コラム詳細 |
 | `/contact` | `src/app/contact/page.tsx` | お問い合わせフォーム（入力 → 確認 → 完了） |
 | （404） | `src/app/not-found.tsx` | 存在しない URL・記事（PAGE NOT FOUND） |
-| （エラー） | `src/app/error.tsx` | 描画中の例外（PAGE COULD NOT BE LOADED）。CMS 停止中の記事詳細はここに来る（実在記事を 404 と誤判定しないため。`fetchCollectionOrThrow`） |
+| （エラー） | `src/app/error.tsx` | 描画中の例外（PAGE COULD NOT BE LOADED）。CMS に到達できないときの記事詳細はここに来る（実在記事を 404 と誤判定しないため。`fetchCollectionOrThrow`）。本番では存在しない記事 URL は 404（PAGE NOT FOUND）になる |
 
 > `/robots.txt` は `src/app/robots.ts` が生成する（後述の SEO / メタタグを参照）。
 
@@ -220,18 +221,6 @@ lyrics-web-frontend/
 - Resend を使うには送信ドメイン（flexqstudio.com）の認証レコードを ConoHa の DNS に追加する必要がある
 - Strapi に問い合わせを保存する構成へ移行する場合も、エントリーポイントは Server Action のまま（スパム判定・検証を Next 側に残す）にし、`getContactDelivery` で Strapi へ投稿する `ContactDelivery` に差し替える
 
----------|------|
-| `src/components/contact/ContactForm.tsx` | 入力 / 入力確認 / 送信完了の 3 ステップ（クライアント） |
-| `src/app/contact/actions.ts` | Server Action。サーバー側で再検証 → スパム判定 → メール送信 |
-| `src/lib/contact.ts` | 目的の選択肢・バリデーション（クライアント / サーバー共通） |
-| `src/lib/contactGuard.ts` | スパム対策（ハニーポット・署名付きトークンによる最小入力時間 3 秒 / 有効期限 12 時間・同一内容の連投抑制 10 分） |
-| `src/lib/contactMail.ts` | `contact@flexqstudio.com` 宛のメール送信（Resend API を fetch で呼ぶ） |
-
-- 環境変数: `CONTACT_MAIL_PROVIDER`（`ses` / `resend` / `log`。未指定なら `AWS_SES_ACCESS_KEY_ID` → ses、`RESEND_API_KEY` → resend、どちらもなければ開発環境は log・本番はエラー）、`AWS_SES_REGION` / `AWS_SES_ACCESS_KEY_ID` / `AWS_SES_SECRET_ACCESS_KEY`（送信専用 IAM ユーザー。Vercel 予約名の `AWS_ACCESS_KEY_ID` とは別名）、`CONTACT_FROM_EMAIL`（差出人）、`CONTACT_TO_EMAIL`（運営者宛の受信先の上書き。サンドボックスでのテスト用）、`CONTACT_FORM_SECRET`（トークン署名キー。本番では必ず設定する）
-- Notion 台帳: ページ「FlexQ お問い合わせ管理」（https://app.notion.com/p/3ee780496c2f81a7a988f6de784ee75f・運営者と共有する前提でトップレベルに作成）内のデータベース「お問い合わせ一覧」（data source `4a2abac5-74d1-42d8-88eb-cc915ab70f0f`）。プロパティ名は `contactNotion.ts` の `PROP` と一致させる。ステータスは 新着 → 対応中 → 完了（保留 / 迷惑）。書き込みには内部インテグレーションを作成して台帳ページに接続し、`NOTION_TOKEN` に設定する
-- SES の運用: 開発中は**開発者アカウント**（サンドボックス。差出人・宛先とも検証済みアドレスのみ）の送信専用 IAM ユーザーで接続し、リリース前に **運営者アカウント**（本番アクセス承認済み・`noreply@flexqstudio.com` のドメイン検証 / DKIM / DMARC 整備済み）の送信専用 IAM ユーザーへ Vercel の環境変数を差し替える（Preview = staging と Production）。IAM ポリシーは `ses:SendEmail` / `ses:SendRawEmail` のみ・`ses:FromAddress` を差出人に限定する。SAM デプロイ用の `flexq-deploy` キーは流用しない
-- スパム対策は外部サービスを使わない方針。bot と判定した送信はエラーを返さず成功画面を出す（対策の存在を悟らせないため）。連投抑制は Lambda インスタンス内のメモリによるベストエフォート
-- Resend を使うには送信ドメイン（flexqstudio.com）の認証レコードを ConoHa の DNS に追加する必要がある
 
 ---
 

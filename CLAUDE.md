@@ -46,7 +46,7 @@ npx playwright test e2e/top-page.spec.ts   # 単一フロー
 | UI コンポーネント | shadcn/ui（style: base-nova） |
 | ホスティング | Vercel |
 | CMS / API | Strapi v5（lyrics-web-strapi） |
-| ランタイム | Node.js v22 |
+| ランタイム | Node.js v24（`.nvmrc` = 24.22.1・`package.json` の `engines` で 24.x に固定） |
 | パッケージマネージャー | Yarn |
 
 ### 関連リポジトリ
@@ -62,7 +62,7 @@ npx playwright test e2e/top-page.spec.ts   # 単一フロー
 
 ### 前提条件
 
-- Node.js v22 以上
+- Node.js v24（`nvm use` で `.nvmrc` のバージョンに切り替わる。Node.js 20 は EOL）
 - Yarn
 - `lyrics-web-strapi` がローカルで起動済み（`http://localhost:1337`）
   - Strapi 側で Content API のパブリック権限を設定済みであること（詳細は lyrics-web-strapi の CLAUDE.md 参照）
@@ -86,10 +86,10 @@ NEXT_PUBLIC_STRAPI_URL=http://localhost:1337
 ### 依存関係インストール
 
 ```bash
-yarn install --ignore-engines
+yarn install
 ```
 
-> Node.js v22.11.0 で eslint-visitor-keys の engines 制約が発生するため `--ignore-engines` を付けています。
+> 以前は Node.js v22.11.0 で eslint-visitor-keys の engines 制約が発生するため `--ignore-engines` を付けていましたが、Node.js v24 では不要です（engines 制約で止まる場合だけ付ける）。
 
 ### 開発サーバー起動
 

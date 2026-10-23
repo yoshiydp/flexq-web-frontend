@@ -107,8 +107,8 @@
 
 | 項目 | バージョン / 内容 |
 | --- | --- |
-| フレームワーク | Next.js 16.2.9（App Router・ISR） |
-| React | 19.2.4 |
+| フレームワーク | Next.js 16.4.2（App Router・ISR） |
+| React | 19.3.1 |
 | 言語 | TypeScript 5 |
 | スタイリング | Tailwind CSS v4 |
 | UI コンポーネント | shadcn/ui（style: `base-nova`）/ @base-ui/react / lucide-react |
@@ -116,7 +116,7 @@
 | 慣性スクロール | Lenis |
 | CMS / API | Strapi v5（[lyrics-web-strapi](https://github.com/yoshiydp/lyrics-web-strapi)）※ 現在は休止中 |
 | ホスティング | Vercel（プロジェクト `flexq-web`） |
-| Node.js | 22（`.nvmrc`） |
+| Node.js | 24（`.nvmrc` = 24.22.1。`package.json` の `engines` で 24.x に固定） |
 | パッケージマネージャー | Yarn 1.22（Classic） |
 
 ### 開発ツール
@@ -205,7 +205,7 @@
 
 ### 前提条件
 
-- Node.js 22（`nvm use` で `.nvmrc` のバージョンに切り替わります）
+- Node.js 24（`nvm use` で `.nvmrc` のバージョンに切り替わります。Node.js 20 は EOL のため使わない）
 - Yarn 1.22（Classic）
 - **Strapi は起動していなくても動きます。** CMS に繋がらない場合、トップページはフォールバック文言で描画され、記事一覧は空状態になります。記事ページまで確認したいときだけ [lyrics-web-strapi](https://github.com/yoshiydp/lyrics-web-strapi) を `http://localhost:1337` で起動してください
 
@@ -215,14 +215,14 @@
 git clone git@github.com:yoshiydp/flexq-web-frontend.git
 cd flexq-web-frontend
 
-yarn install --ignore-engines
+yarn install
 cp .env.local.example .env.local
 yarn dev
 ```
 
 `http://localhost:3000` で開きます。
 
-> `--ignore-engines` は、Node.js 22 で一部の依存（eslint-visitor-keys）の `engines` 制約に掛かるのを避けるために付けています。
+> 以前は Node.js 22 で一部の依存（eslint-visitor-keys）の `engines` 制約に掛かるため `yarn install --ignore-engines` としていましたが、Node.js 24 では不要です（`engines` 制約で止まる場合だけ `--ignore-engines` を付けてください）。
 
 ### 環境変数
 

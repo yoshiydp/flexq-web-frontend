@@ -1,12 +1,21 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("SP メニュー", () => {
+import { waitForHydration } from "./helpers";
+
+/**
+ * SP メニュー（docs/test-cases.md「2. ナビゲーション / SP メニュー（NV）」の NV-03〜NV-05）。
+ */
+
+test.describe("NV SP メニュー", { tag: "@NV" }, () => {
   test.beforeEach(async ({ page, isMobile }) => {
     test.skip(!isMobile, "SP メニューは 768px 未満のみ表示");
     await page.goto("/");
+    await waitForHydration(
+      page.getByRole("button", { name: "メニューを開く" }),
+    );
   });
 
-  test("ハンバーガーで開き、リンクタップで閉じる", async ({ page }) => {
+  test("NV-03 ハンバーガーで開き、リンクタップで閉じる", async ({ page }) => {
     const menu = page.getByTestId("mobile-menu");
     await expect(menu).toBeHidden();
 
@@ -19,7 +28,7 @@ test.describe("SP メニュー", () => {
     await expect(page.locator("#faq")).toBeInViewport();
   });
 
-  test("× ボタンで閉じる", async ({ page }) => {
+  test("NV-04 × ボタンで閉じる", async ({ page }) => {
     const menu = page.getByTestId("mobile-menu");
     await page.getByRole("button", { name: "メニューを開く" }).click();
     await expect(menu).toBeVisible();
@@ -28,7 +37,7 @@ test.describe("SP メニュー", () => {
     await expect(menu).toBeHidden();
   });
 
-  test("メニュー下部にストアボタンが表示される", async ({ page }) => {
+  test("NV-05 メニュー下部にストアボタンが表示される", async ({ page }) => {
     const menu = page.getByTestId("mobile-menu");
     await page.getByRole("button", { name: "メニューを開く" }).click();
     await expect(menu.getByRole("link", { name: /App Store/ })).toBeVisible();

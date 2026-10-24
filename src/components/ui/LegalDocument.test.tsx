@@ -51,3 +51,27 @@ describe("LegalDocument", () => {
     );
   });
 });
+
+describe("LegalDocument の関連リンクと日付の見出し", () => {
+  it("条項の関連リンクを表示し、日付の見出しを差し替えられる", () => {
+    render(
+      <LegalDocument
+        lead="アカウントの削除方法をご案内します。"
+        sections={[
+          {
+            title: "1. 削除を依頼する",
+            paragraphs: ["お問い合わせフォームからご依頼ください。"],
+            link: { href: "/contact", label: "お問い合わせフォームへ" },
+          },
+        ]}
+        enactedDate="2026年10月24日"
+        dateLabel="掲載日"
+      />,
+    );
+    expect(
+      screen.getByRole("link", { name: "お問い合わせフォームへ" }),
+    ).toHaveAttribute("href", "/contact");
+    expect(screen.getByText("掲載日: 2026年10月24日")).toBeInTheDocument();
+    expect(screen.queryByText(/制定日/)).toBeNull();
+  });
+});

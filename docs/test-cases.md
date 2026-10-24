@@ -75,7 +75,7 @@ npx playwright test --grep "CT-04 "            # ケース単位
 | TP-06 | APP PREVIEW（PC）の自動カルーセル | PC の幅（768px 以上） | APP PREVIEW を開いたまま 20 秒ほど待つ | 最初は PROJECT EDITOR が中央でアクティブ（ゴールドの枠・1.3 倍）。6 秒ごとに右から左へ 1 台ずつ送られ、4 台を一巡しても途切れず（逆走せず）流れ続ける。各画面の動画（画面収録）は音なしでループ再生され、左右の端は徐々に透明になる | 手動 | — |
 | TP-07 | ダウンロード CTA のストアボタン | — | ページ下部のダウンロード CTA を見て、各ボタンをクリックする | 「App Store からダウンロード」の公式バッジが表示される。ストア URL が未設定の間（現状）はクリックしても CTA 自身（`/#download`）に留まる。URL 設定後は新しいタブでストアが開く。「Google Play で手に入れよう」は Google Play の URL を設定した後（Android 版の公開後）だけ App Store の隣に並ぶ（幅が狭いと縦に並ぶ）。未設定の間（現状）は表示されない | 自動 ★ | `top-page.spec.ts` |
 | TP-08 | CMS 未接続時の NEWS / LEARN | Strapi 未接続 | `/` を開き、ヘッダーとフッターのナビを見る | NEWS / LEARN & READ セクションは表示されず、ナビにも NEWS / LEARN のリンクが出ない（FEATURES / PREVIEW / FAQ は常に表示）。Strapi 稼働中で記事がある場合はセクションとナビのリンクが両方表示される（AR-05） | 自動 | `top-page.spec.ts` |
-| TP-09 | フッター | — | ページ最下部のフッターを見る | ロゴ、ナビ（FEATURES / PREVIEW / FAQ）、PRIVACY POLICY / TERMS / CONTACT のリンク、`© <今年> FlexQ`、Apple / Google の商標表記（「…App Store は、米国および他の国々で登録された Apple Inc. の商標です。Google Play および Google Play ロゴは Google LLC の商標です。」）が表示される | 自動 | `top-page.spec.ts` |
+| TP-09 | フッター | — | ページ最下部のフッターを見る | ロゴ、ナビ（FEATURES / PREVIEW / FAQ）、PRIVACY POLICY / TERMS / ACCOUNT DELETION / CONTACT のリンク、`© <今年> FlexQ`、Apple / Google の商標表記（「…App Store は、米国および他の国々で登録された Apple Inc. の商標です。Google Play および Google Play ロゴは Google LLC の商標です。」）が表示される | 自動 | `top-page.spec.ts` |
 
 ## 2. ナビゲーション / SP メニュー（NV）
 
@@ -146,9 +146,10 @@ Google OAuth の同意画面（アプリのログイン）から参照される�
 |----|----|----|----|----|----|----|
 | LG-01 | 利用規約 | — | `/terms` を開いて最後までスクロールする | 見出し TERMS OF SERVICE の下に前文と第1条（適用）〜第13条（お問い合わせ）の 13 条、`contact@flexqstudio.com`（mailto）、「制定日: 2026年8月15日」、「← トップへ戻る」が表示される | 自動 ★ | `legal.spec.ts` |
 | LG-02 | プライバシーポリシー | — | `/privacy-policy` を開いて最後までスクロールする | 見出し PRIVACY POLICY の下に前文と第1条（収集する情報）〜第11条（お問い合わせ）の 11 条、`contact@flexqstudio.com`（mailto）、「制定日: 2026年8月15日」が表示される | 自動 ★ | `legal.spec.ts` |
-| LG-03 | フッターからの移動 | — | トップのフッターで PRIVACY POLICY / TERMS / CONTACT をそれぞれクリックする | `/privacy-policy` / `/terms` / `/contact` に移動し、それぞれの見出しが表示される | 自動 | `legal.spec.ts` |
+| LG-03 | フッターからの移動 | — | トップのフッターで PRIVACY POLICY / TERMS / ACCOUNT DELETION / CONTACT をそれぞれクリックする | `/privacy-policy` / `/terms` / `/account-deletion` / `/contact` に移動し、それぞれの見出しが表示される | 自動 | `legal.spec.ts` |
 | LG-04 | トップへ戻る | — | `/terms` の最下部の「← トップへ戻る」をクリックする | トップページ（`/`）に戻る | 自動 | `legal.spec.ts` |
 | LG-05 | 本番 URL への到達 | 本番 | https://flexqstudio.com/privacy-policy と https://flexqstudio.com/terms を開く（アプリの Google ログインの同意画面からのリンクでも確認する） | どちらも 200 で表示される（URL を変えると同意画面のリンクが切れるため変更しない） | 手動 | — |
+| LG-06 | アカウント削除のご案内 | — | `/account-deletion` を開いて最後までスクロールし、「お問い合わせフォームへ」をクリックする | 見出し ACCOUNT DELETION の下に前文と「1. 本アプリから削除する」〜「5. お問い合わせ」の 5 項目（アプリ内の削除手順〈PROFILE → DELETE ACCOUNT〉・フォームからの依頼方法〈種類「アカウント・データについて」〉・削除されるデータ・一定期間残るデータ）、「掲載日: 2026年10月24日」が表示される。リンクで `/contact` に移動する。Google Play のデータ セーフティに登録する URL のため、パスを変えない | 自動 | `legal.spec.ts` |
 
 ## 8. SEO / OGP（SE）
 

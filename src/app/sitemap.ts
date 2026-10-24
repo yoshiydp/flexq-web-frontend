@@ -19,6 +19,7 @@ const STATIC_PATHS = [
   routes.columns,
   routes.terms,
   routes.privacyPolicy,
+  routes.accountDeletion,
   routes.contact,
 ];
 

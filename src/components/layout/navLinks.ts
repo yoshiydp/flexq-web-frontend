@@ -44,5 +44,6 @@ export const DOWNLOAD_ANCHOR = "/#download";
 export const LEGAL_LINKS: readonly NavLink[] = [
   { href: routes.privacyPolicy, label: "PRIVACY POLICY" },
   { href: routes.terms, label: "TERMS" },
+  { href: routes.accountDeletion, label: "ACCOUNT DELETION" },
   { href: routes.contact, label: "CONTACT" },
 ];

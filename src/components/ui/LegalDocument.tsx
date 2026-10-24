@@ -9,6 +9,8 @@ export type LegalSection = {
   items?: string[];
   /** 箇条書きの後に続く段落 */
   notes?: string[];
+  /** サイト内の関連ページへのリンク（段落の後に表示） */
+  link?: { href: string; label: string };
   /** 連絡先メールアドレス（mailto リンクとして表示） */
   email?: string;
 };
@@ -19,6 +21,8 @@ type Props = {
   sections: LegalSection[];
   /** 制定日（例: 2026年8月15日） */
   enactedDate: string;
+  /** 日付の見出し。規約・ポリシー以外の案内ページでは「掲載日」などにする */
+  dateLabel?: string;
 };
 
 const PARAGRAPH_CLASS = "text-[15px] leading-[2] text-secondary-foreground";
@@ -27,7 +31,12 @@ const PARAGRAPH_CLASS = "text-[15px] leading-[2] text-secondary-foreground";
  * プライバシーポリシー・利用規約など法的文書の共通レイアウト。
  * 記事詳細（ArticleBody）と同じタイポグラフィに揃える。
  */
-export default function LegalDocument({ lead, sections, enactedDate }: Props) {
+export default function LegalDocument({
+  lead,
+  sections,
+  enactedDate,
+  dateLabel = "制定日",
+}: Props) {
   return (
     <article className="flex flex-col gap-10">
       <p className={PARAGRAPH_CLASS}>{lead}</p>
@@ -54,6 +63,16 @@ export default function LegalDocument({ lead, sections, enactedDate }: Props) {
               {note}
             </p>
           ))}
+          {section.link && (
+            <p className={PARAGRAPH_CLASS}>
+              <Link
+                href={section.link.href}
+                className="text-primary underline underline-offset-4"
+              >
+                {section.link.label}
+              </Link>
+            </p>
+          )}
           {section.email && (
             <p className={PARAGRAPH_CLASS}>
               <a
@@ -68,7 +87,7 @@ export default function LegalDocument({ lead, sections, enactedDate }: Props) {
       ))}
 
       <p className="font-mono text-[11px] tracking-[.2em] text-muted-foreground">
-        制定日: {enactedDate}
+        {dateLabel}: {enactedDate}
       </p>
 
       <footer className="border-t border-border pt-8">

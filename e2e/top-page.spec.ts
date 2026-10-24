@@ -69,12 +69,14 @@ test.describe("TP トップページ", { tag: "@TP" }, () => {
     await expect(captions.nth(0)).not.toHaveClass(/text-primary/);
   });
 
-  test("TP-07 CTA にストアボタンが 2 つ表示される", async ({ page }) => {
+  test("TP-07 CTA にストアボタンが表示される", async ({ page }) => {
     const cta = page.locator("#download");
     await cta.scrollIntoViewIfNeeded();
+    // Google Play は URL 設定後（Android 版の公開後）だけバッジが出る
+    const googlePlay = cta.getByRole("link", { name: /Google Play/ });
     const badges = [
       cta.getByRole("link", { name: /App Store/ }),
-      cta.getByRole("link", { name: /Google Play/ }),
+      ...((await googlePlay.count()) > 0 ? [googlePlay] : []),
     ];
     for (const badge of badges) {
       await expect(badge).toBeVisible();

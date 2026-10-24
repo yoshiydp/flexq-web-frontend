@@ -73,7 +73,7 @@ npx playwright test --grep "CT-04 "            # ケース単位
 | TP-04 | 3 CORE FEATURES の見出しの改行 | — | 画面幅を 1023px / 768px / 375px / 320px と 1024px にして見出しを見る | 1023px 以下では 3 枚とも読点の直後で改行される（「作りたい場所へ、/ ワンタップ。」「思いついた瞬間、/ そのまま録る。」「聴きながら、/ そのまま書く。」）。1024px 以上は読点ごとの区切り（inline-block）が外れ、`text-wrap: balance` に任せる（折り返し位置は日本語フォントに左右されるため E2E では位置ではなく balance が効いていることを確認する。macOS の Chrome では 1 枚目が「作りたい場所 / へ、ワンタップ。」になる） | 自動 | `features-linebreak.spec.ts`（PC のみ。幅を直接変えて検証） |
 | TP-05 | APP PREVIEW（SP）のドット | SP の幅（768px 未満） | APP PREVIEW までスクロールし、カルーセル下の 2 つ目のドット（既定は PROJECT EDITOR）をタップする | 横スクロールでその画面が中央に来て、キャプションがゴールド・ドットが点灯する。最初は先頭（既定は PROJECT LIST）がアクティブ。指で横にスワイプしても 1 台ずつ中央で止まる | 自動 | `top-page.spec.ts`（SP のみ） |
 | TP-06 | APP PREVIEW（PC）の自動カルーセル | PC の幅（768px 以上） | APP PREVIEW を開いたまま 20 秒ほど待つ | 最初は PROJECT EDITOR が中央でアクティブ（ゴールドの枠・1.3 倍）。6 秒ごとに右から左へ 1 台ずつ送られ、4 台を一巡しても途切れず（逆走せず）流れ続ける。各画面の動画（画面収録）は音なしでループ再生され、左右の端は徐々に透明になる | 手動 | — |
-| TP-07 | ダウンロード CTA のストアボタン | — | ページ下部のダウンロード CTA を見て、各ボタンをクリックする | 「App Store からダウンロード」「Google Play で手に入れよう」の公式バッジが 2 つ並ぶ（幅が狭いと縦に並ぶ）。ストア URL が未設定の間（現状）はクリックしても CTA 自身（`/#download`）に留まる。URL 設定後は新しいタブでストアが開く | 自動 ★ | `top-page.spec.ts` |
+| TP-07 | ダウンロード CTA のストアボタン | — | ページ下部のダウンロード CTA を見て、各ボタンをクリックする | 「App Store からダウンロード」の公式バッジが表示される。ストア URL が未設定の間（現状）はクリックしても CTA 自身（`/#download`）に留まる。URL 設定後は新しいタブでストアが開く。「Google Play で手に入れよう」は Google Play の URL を設定した後（Android 版の公開後）だけ App Store の隣に並ぶ（幅が狭いと縦に並ぶ）。未設定の間（現状）は表示されない | 自動 ★ | `top-page.spec.ts` |
 | TP-08 | CMS 未接続時の NEWS / LEARN | Strapi 未接続 | `/` を開き、ヘッダーとフッターのナビを見る | NEWS / LEARN & READ セクションは表示されず、ナビにも NEWS / LEARN のリンクが出ない（FEATURES / PREVIEW / FAQ は常に表示）。Strapi 稼働中で記事がある場合はセクションとナビのリンクが両方表示される（AR-05） | 自動 | `top-page.spec.ts` |
 | TP-09 | フッター | — | ページ最下部のフッターを見る | ロゴ、ナビ（FEATURES / PREVIEW / FAQ）、PRIVACY POLICY / TERMS / CONTACT のリンク、`© <今年> FlexQ`、Apple / Google の商標表記（「…App Store は、米国および他の国々で登録された Apple Inc. の商標です。Google Play および Google Play ロゴは Google LLC の商標です。」）が表示される | 自動 | `top-page.spec.ts` |
 
@@ -85,7 +85,7 @@ npx playwright test --grep "CT-04 "            # ケース単位
 | NV-02 | ヘッダーの DOWNLOAD | — | ヘッダーの DOWNLOAD（PC はナビ右端、SP はハンバーガーの左）をクリックする | ダウンロード CTA までスクロールし、URL の末尾が `#download` になる | 自動 | `navigation.spec.ts` |
 | NV-03 | SP メニューを開いてリンクで移動 | SP の幅 | ハンバーガー（3 本線）をタップ → メニュー内の FAQ をタップする | 全画面のメニューがフェードで開き、ロゴ・× ボタン・ナビ・ストアボタンが並ぶ。FAQ をタップするとメニューが閉じて FAQ セクションが表示される | 自動 ★ | `mobile-menu.spec.ts`（SP のみ） |
 | NV-04 | SP メニューを × で閉じる | SP の幅 | メニューを開いて右上の × をタップする | メニューがフェードで閉じ、元のスクロール位置のまま | 自動 | `mobile-menu.spec.ts`（SP のみ） |
-| NV-05 | SP メニューのストアボタン | SP の幅 | メニューを開いて下部を見る | App Store / Google Play のバッジが縦に並んで表示される | 自動 | `mobile-menu.spec.ts`（SP のみ） |
+| NV-05 | SP メニューのストアボタン | SP の幅 | メニューを開いて下部を見る | App Store のバッジが表示される。Google Play の URL 設定後（Android 版の公開後）は Google Play のバッジがその下に縦に並ぶ | 自動 | `mobile-menu.spec.ts`（SP のみ） |
 | NV-06 | サブページからトップのセクションへ | — | `/terms` を開き、ヘッダーの FAQ（SP はメニュー内の FAQ）をクリックする | トップページへ遷移し、FAQ セクションが表示される（URL は `/#faq`） | 自動 | `navigation.spec.ts` |
 | NV-07 | サブページのロゴでトップへ | — | `/privacy-policy` を開き、ヘッダー左のロゴをクリックする | トップページ（`/`）に戻る。サブページでは SP でもヘッダーにロゴが表示される（トップの SP ではヒーローの大ロゴと重なるため出さない。RS-01） | 自動 | `navigation.spec.ts` |
 | NV-08 | 戻る / 進む | PC（トラックパッドかマウスホイール） | トップでナビから FAQ へ移動 → ブラウザの「戻る」→「進む」。続けて `/terms` へ移動して「戻る」 | 「戻る」でアンカー移動前の位置に、「進む」で FAQ の位置に戻る。慣性スクロールの残りで勝手に動き続けない。`/terms` から戻るとトップのスクロール位置が復元される | 手動 | — |

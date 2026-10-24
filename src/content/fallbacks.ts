@@ -87,12 +87,12 @@ export const topPageFallback: TopPageContent = {
     {
       question: "対応している OS を教えてください。",
       answer:
-        "iPhone と Android の両方に対応しています。App Store / Google Play からダウンロードできます。",
+        "現在は iPhone に対応しており、App Store からダウンロードできます。Android 版は準備中です。",
     },
     {
       question: "アカウント登録は必要ですか？",
       answer:
-        "はい、必要です。メールアドレスとパスワードでご登録いただけます。ご登録時は、メールアドレス宛てに届く認証コードを入力して確認を行います。Google アカウントでの登録にも対応しています。",
+        "はい、必要です。メールアドレスとパスワードでご登録いただけます。ご登録時は、メールアドレス宛てに届く認証コードを入力して確認を行います。Google アカウントでの登録や、iPhone では Apple アカウントでの登録（Apple でサインイン）にも対応しています。",
     },
     {
       question: "手持ちの音源ファイルを取り込めますか？",
@@ -107,7 +107,7 @@ export const topPageFallback: TopPageContent = {
     {
       question: "書いたリリックを書き出せますか？",
       answer:
-        "はい。プロジェクトや QUICK MEMO で書いたリリックは共有機能から、テキストのまま LINE やメモアプリなどへ送ったり、.txt ファイルとして書き出したりできます。Android では端末内のフォルダへの保存にも対応しています。",
+        "はい。プロジェクトや QUICK MEMO で書いたリリックは共有機能から、テキストのまま LINE やメモアプリなどへ送ったり、.txt ファイルとして書き出したりできます。",
     },
     {
       question: "録音したデータを共有できますか？",
@@ -134,7 +134,8 @@ export const topPageFallback: TopPageContent = {
 
   cta: {
     heading: "さあ、次の一節を。",
-    lead: "アプリは無料でダウンロードできます。iPhone / Android のどちらでも、今すぐ書きはじめられます。",
+    // 改行は CtaSection の whitespace-pre-line で表示する
+    lead: "アプリは無料でダウンロードできます。\niPhone で、今すぐ書きはじめられます。\nAndroid 版は準備中です。",
     appStoreUrl: null,
     googlePlayUrl: null,
   },

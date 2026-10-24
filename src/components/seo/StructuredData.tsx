@@ -47,7 +47,8 @@ export default function StructuredData() {
         name: SITE_NAME,
         description: SITE_DESCRIPTION,
         applicationCategory: "MusicApplication",
-        operatingSystem: "iOS, Android",
+        // Android 版の公開時に "iOS, Android" へ戻す
+        operatingSystem: "iOS",
         inLanguage: "ja",
         url: SITE_URL,
         publisher: { "@id": absoluteUrl("/#organization") },

@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  *
  * バッジ画像そのものは加工しない（改変・切り抜きは両社のガイドラインで禁止されている）。
  */
-const BADGE_HEIGHT = 46;
+const BADGE_HEIGHT = 56;
 const GOOGLE_BADGE_VISIBLE_RATIO = 192 / 250;
 
 const badgeLink =
@@ -48,7 +48,9 @@ function BadgeLink({ href, children }: BadgeLinkProps) {
  * App Store / Google Play のストアバッジ。
  *
  * Apple・Google が配布している公式バッジ（日本語版）をそのまま使う。
- * URL は CMS から供給し、未設定のあいだはダウンロード CTA へアンカーする。
+ * URL は CMS から供給し、App Store は未設定のあいだダウンロード CTA へアンカーする。
+ * Google Play のバッジは Google Play で入手できるアプリの宣伝にしか使えないため、
+ * URL が設定される（Android 版を公開する）まではバッジ自体を出さない。
  * 画像は next/image を通さない（バッジは再エンコードせず配布物のまま出す）。
  */
 export default function StoreLinks({
@@ -72,24 +74,26 @@ export default function StoreLinks({
         <img
           src="/badges/app-store-ja.svg"
           alt="App Store からダウンロード"
-          width={125}
+          width={152}
           height={BADGE_HEIGHT}
           style={{ height: BADGE_HEIGHT, width: "auto" }}
         />
       </BadgeLink>
-      <BadgeLink href={googlePlayUrl}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/badges/google-play-ja.png"
-          alt="Google Play で手に入れよう"
-          width={155}
-          height={60}
-          style={{
-            height: BADGE_HEIGHT / GOOGLE_BADGE_VISIBLE_RATIO,
-            width: "auto",
-          }}
-        />
-      </BadgeLink>
+      {googlePlayUrl?.trim() ? (
+        <BadgeLink href={googlePlayUrl}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/badges/google-play-ja.png"
+            alt="Google Play で手に入れよう"
+            width={155}
+            height={60}
+            style={{
+              height: BADGE_HEIGHT / GOOGLE_BADGE_VISIBLE_RATIO,
+              width: "auto",
+            }}
+          />
+        </BadgeLink>
+      ) : null}
     </div>
   );
 }

@@ -32,7 +32,7 @@ export default function CtaSection({ tagline, cta }: Props) {
         <h2 className="reveal-up mt-3 text-[clamp(26px,4vw,34px)] font-semibold text-foreground [--reveal-delay:200ms]">
           {cta.heading}
         </h2>
-        <p className="reveal-up max-w-[520px] text-[15px] leading-[1.9] text-secondary-foreground [text-wrap:pretty] [--reveal-delay:300ms]">
+        <p className="reveal-up max-w-[520px] text-[15px] leading-[1.9] whitespace-pre-line text-secondary-foreground [text-wrap:pretty] [--reveal-delay:300ms]">
           {cta.lead}
         </p>
         <StoreLinks

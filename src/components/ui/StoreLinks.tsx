@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  *
  * バッジ画像そのものは加工しない（改変・切り抜きは両社のガイドラインで禁止されている）。
  */
-const BADGE_HEIGHT = 46;
+const BADGE_HEIGHT = 56;
 const GOOGLE_BADGE_VISIBLE_RATIO = 192 / 250;
 
 const badgeLink =
@@ -74,7 +74,7 @@ export default function StoreLinks({
         <img
           src="/badges/app-store-ja.svg"
           alt="App Store からダウンロード"
-          width={125}
+          width={152}
           height={BADGE_HEIGHT}
           style={{ height: BADGE_HEIGHT, width: "auto" }}
         />

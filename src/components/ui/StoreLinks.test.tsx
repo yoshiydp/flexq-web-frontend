@@ -55,6 +55,22 @@ describe("StoreLinks", () => {
     expect(container.firstChild).toHaveClass("flex-col", "w-full");
   });
 
+  it("バッジの見た目の高さは 56px で、Google はクリアスペースぶん画像を高くして揃える", () => {
+    render(
+      <StoreLinks
+        appStoreUrl={null}
+        googlePlayUrl="https://play.google.com/store/apps/details?id=com.yoshiydp.lyricsapp"
+      />,
+    );
+    expect(screen.getByAltText("App Store からダウンロード")).toHaveStyle({
+      height: "56px",
+    });
+    // 646x250 の画像のうちバッジ本体は高さ 192 → 56 / (192 / 250)
+    expect(screen.getByAltText("Google Play で手に入れよう")).toHaveStyle({
+      height: `${56 / (192 / 250)}px`,
+    });
+  });
+
   it("URL 設定時は外部リンクとして開く", () => {
     render(
       <StoreLinks

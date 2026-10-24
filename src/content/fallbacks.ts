@@ -134,7 +134,8 @@ export const topPageFallback: TopPageContent = {
 
   cta: {
     heading: "さあ、次の一節を。",
-    lead: "アプリは無料でダウンロードできます。iPhone で、今すぐ書きはじめられます（Android 版は準備中です）。",
+    // 改行は CtaSection の whitespace-pre-line で表示する
+    lead: "アプリは無料でダウンロードできます。\niPhone で、今すぐ書きはじめられます。\nAndroid 版は準備中です。",
     appStoreUrl: null,
     googlePlayUrl: null,
   },

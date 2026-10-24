@@ -128,6 +128,7 @@ test.describe("TP トップページ", { tag: "@TP" }, () => {
     for (const [label, href] of [
       ["PRIVACY POLICY", "/privacy-policy"],
       ["TERMS", "/terms"],
+      ["ACCOUNT DELETION", "/account-deletion"],
       ["CONTACT", "/contact"],
     ]) {
       await expect(

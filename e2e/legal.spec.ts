@@ -53,12 +53,13 @@ test.describe("LG 規約 / プライバシー", { tag: "@LG" }, () => {
     });
   }
 
-  test("LG-03 トップのフッターから規約・ポリシー・お問い合わせへ移動できる", async ({
+  test("LG-03 トップのフッターから規約・ポリシー・アカウント削除・お問い合わせへ移動できる", async ({
     page,
   }) => {
     for (const [label, path, heading] of [
       ["PRIVACY POLICY", "/privacy-policy", "PRIVACY POLICY"],
       ["TERMS", "/terms", "TERMS OF SERVICE"],
+      ["ACCOUNT DELETION", "/account-deletion", "ACCOUNT DELETION"],
       ["CONTACT", "/contact", "CONTACT"],
     ]) {
       await page.goto("/");
@@ -72,6 +73,36 @@ test.describe("LG 規約 / プライバシー", { tag: "@LG" }, () => {
         page.getByRole("heading", { name: heading, exact: true }),
       ).toBeVisible();
     }
+  });
+
+  test("LG-06 アカウント削除のご案内に削除手順・依頼方法・削除されるデータが表示される", async ({
+    page,
+  }) => {
+    await page.goto("/account-deletion");
+    await expect(
+      page.getByRole("heading", { name: "ACCOUNT DELETION", exact: true }),
+    ).toBeVisible();
+
+    const article = page.getByRole("article");
+    await expect(article.getByRole("heading", { level: 2 })).toHaveCount(5);
+    await expect(
+      article.getByText("「DELETE ACCOUNT」をタップする", { exact: false }),
+    ).toBeVisible();
+    await expect(
+      article.getByText("「アカウント・データについて」を選ぶ", {
+        exact: false,
+      }),
+    ).toBeAttached();
+    await expect(
+      article.getByRole("heading", { name: "3. 削除されるデータ" }),
+    ).toBeAttached();
+    await expect(article.getByText("掲載日: 2026年10月24日")).toBeAttached();
+
+    // アプリを使わずに依頼する導線（Google Play が求める Web からの削除依頼）
+    const form = article.getByRole("link", { name: "お問い合わせフォームへ" });
+    await form.scrollIntoViewIfNeeded();
+    await form.click();
+    await expect(page).toHaveURL(/\/contact$/);
   });
 
   test("LG-04 「トップへ戻る」でトップページへ戻る", async ({ page }) => {

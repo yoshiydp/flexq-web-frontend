@@ -3,6 +3,7 @@ import SubPageShell from "@/components/layout/SubPageShell";
 import LegalDocument, {
   type LegalSection,
 } from "@/components/ui/LegalDocument";
+import { routes } from "@/lib/routes";
 import { CONTACT_EMAIL } from "@/lib/site";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -86,7 +87,9 @@ const SECTIONS: LegalSection[] = [
     title: "第8条（アカウントの削除）",
     paragraphs: [
       "ユーザーは、本アプリ内の機能からいつでもアカウントを削除できます。アカウントを削除した場合、当方が保存するユーザーの個人情報およびユーザーコンテンツはすべて削除されます。",
+      "本アプリを利用できない場合は、お問い合わせフォームから削除を依頼できます。削除の手順、削除されるデータ、削除後も一定期間保持するデータは、アカウント削除のご案内に記載しています。",
     ],
+    link: { href: routes.accountDeletion, label: "アカウント削除のご案内へ" },
   },
   {
     title: "第9条（開示・訂正・利用停止等の請求）",

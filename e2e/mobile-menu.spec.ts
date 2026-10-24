@@ -41,6 +41,8 @@ test.describe("NV SP メニュー", { tag: "@NV" }, () => {
     const menu = page.getByTestId("mobile-menu");
     await page.getByRole("button", { name: "メニューを開く" }).click();
     await expect(menu.getByRole("link", { name: /App Store/ })).toBeVisible();
-    await expect(menu.getByRole("link", { name: /Google Play/ })).toBeVisible();
+    // Google Play は URL 設定後（Android 版の公開後）だけバッジが出る
+    const googlePlay = menu.getByRole("link", { name: /Google Play/ });
+    if ((await googlePlay.count()) > 0) await expect(googlePlay).toBeVisible();
   });
 });

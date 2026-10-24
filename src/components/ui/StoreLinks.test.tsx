@@ -3,7 +3,12 @@ import StoreLinks from "./StoreLinks";
 
 describe("StoreLinks", () => {
   it("App Store / Google Play の公式バッジを表示する", () => {
-    render(<StoreLinks appStoreUrl={null} googlePlayUrl={null} />);
+    render(
+      <StoreLinks
+        appStoreUrl={null}
+        googlePlayUrl="https://play.google.com/store/apps/details?id=com.yoshiydp.lyricsapp"
+      />,
+    );
     expect(screen.getByRole("link", { name: /App Store/ })).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Google Play/ }),
@@ -25,15 +30,18 @@ describe("StoreLinks", () => {
     );
   });
 
-  it("CMS 由来の空文字 URL もフォールバック扱いにする", () => {
+  it("Google Play は URL 未設定のあいだバッジを出さない", () => {
+    render(<StoreLinks appStoreUrl={null} googlePlayUrl={null} />);
+    expect(screen.queryByRole("link", { name: /Google Play/ })).toBeNull();
+    expect(screen.queryByAltText("Google Play で手に入れよう")).toBeNull();
+  });
+
+  it("CMS 由来の空文字 URL も未設定として扱う", () => {
     render(<StoreLinks appStoreUrl="" googlePlayUrl="  " />);
     const appStore = screen.getByRole("link", { name: /App Store/ });
     expect(appStore).toHaveAttribute("href", "/#download");
     expect(appStore).not.toHaveAttribute("target");
-    expect(screen.getByRole("link", { name: /Google Play/ })).toHaveAttribute(
-      "href",
-      "/#download",
-    );
+    expect(screen.queryByRole("link", { name: /Google Play/ })).toBeNull();
   });
 
   it("既定は横並びで、幅が足りないときだけ折り返す（stacked 時は縦積み）", () => {

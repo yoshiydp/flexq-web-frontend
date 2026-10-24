@@ -87,7 +87,7 @@ export const topPageFallback: TopPageContent = {
     {
       question: "対応している OS を教えてください。",
       answer:
-        "iPhone と Android の両方に対応しています。App Store / Google Play からダウンロードできます。",
+        "現在は iPhone に対応しており、App Store からダウンロードできます。Android 版は準備中です。",
     },
     {
       question: "アカウント登録は必要ですか？",
@@ -107,7 +107,7 @@ export const topPageFallback: TopPageContent = {
     {
       question: "書いたリリックを書き出せますか？",
       answer:
-        "はい。プロジェクトや QUICK MEMO で書いたリリックは共有機能から、テキストのまま LINE やメモアプリなどへ送ったり、.txt ファイルとして書き出したりできます。Android では端末内のフォルダへの保存にも対応しています。",
+        "はい。プロジェクトや QUICK MEMO で書いたリリックは共有機能から、テキストのまま LINE やメモアプリなどへ送ったり、.txt ファイルとして書き出したりできます。",
     },
     {
       question: "録音したデータを共有できますか？",
@@ -134,7 +134,7 @@ export const topPageFallback: TopPageContent = {
 
   cta: {
     heading: "さあ、次の一節を。",
-    lead: "アプリは無料でダウンロードできます。iPhone / Android のどちらでも、今すぐ書きはじめられます。",
+    lead: "アプリは無料でダウンロードできます。iPhone で、今すぐ書きはじめられます（Android 版は準備中です）。",
     appStoreUrl: null,
     googlePlayUrl: null,
   },

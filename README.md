@@ -24,11 +24,11 @@
 
 > **現在の公開状況**
 >
-> - **サイトは独自ドメインで配信中**ですが、アプリのストア公開前のため**検索エンジンには露出させていません**（全ページ `noindex`・`robots.txt` は全拒否）。アプリの一般公開は 2026 年内を予定しています
-> - **ストアバッジのリンク先は未設定**です。設定するまではページ内のダウンロード CTA へのアンカーになります
+> - **サイトは独自ドメインで配信中**で、検索エンジンにも公開しています。`www` と `flexq-web-frontend.vercel.app` は正規ドメインへ転送します
+> - **ストアバッジは App Store へリンクしています**。Google Play のバッジは Android 版の公開まで表示しません
 > - **CMS（Strapi）は休止中**で、本番は `src/content/fallbacks.ts` の文言による静的 LP として動いています。News / Learn セクションと記事ページへの導線は自動的に非表示になります（[コンテンツ管理](#コンテンツ管理)を参照）
 >
-> 公開時に必要な作業は[一般公開時にやること](#一般公開時にやること)にまとめています。
+> Android 版の公開時に必要な作業は [Android 版の公開時にやること](#android-版の公開時にやること)にまとめています。
 
 ---
 
@@ -397,21 +397,17 @@ npx tsc --noEmit && yarn lint && yarn test:ci && yarn build && yarn e2e
 | --- | --- |
 | Vercel プロジェクト | `flexq-web`（FlexQ Web チーム） |
 | 本番 URL | `https://flexqstudio.com`（`www` も同じ内容を配信） |
-| 予備 URL | `flexq-web-frontend.vercel.app` |
+| 転送 | `www.flexqstudio.com` と `flexq-web-frontend.vercel.app` は `https://flexqstudio.com` へ 308 転送（`next.config.ts`） |
 | ドメイン | レジストラはお名前.com。DNS とメール（`contact@flexqstudio.com`）は ConoHa WING に残し、A レコードだけを Vercel に向けている |
 
 DNS レコードの一覧、ConoHa を解約してはいけない理由、トラブルシューティングは [`docs/custom-domain-and-release.md`](docs/custom-domain-and-release.md) にまとめています。
 
-### 一般公開時にやること
+### Android 版の公開時にやること
 
-アプリのストア公開に合わせて実施します。
+1. `src/content/fallbacks.ts` の `cta.googlePlayUrl` に Google Play の URL を設定する
+2. CTA リード文・FAQ の「Android 版は準備中」の表記と、`StructuredData.tsx` の `operatingSystem` を戻す
 
-1. `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする（`noindex` が外れ、`robots.txt` が `Allow: /` になり、`sitemap.xml` に URL が並ぶ）。**これを忘れると、公開しても検索結果に一切出ません**
-2. `src/content/fallbacks.ts` の `cta.appStoreUrl` / `cta.googlePlayUrl` にストアの URL を設定する
-3. Google Search Console に `flexqstudio.com` を登録し、`/sitemap.xml` を送信する
-4. 公開後、`https://flexqstudio.com/robots.txt` が `Allow: /` になっていることを確認する
-
-Preview デプロイ（feature / staging）は、公開後も常に `noindex` のままです。
+検索エンジンへの公開は `src/lib/site.ts` の `ALLOW_INDEXING` で切り替えます（2026-11-05 に `true`）。Preview デプロイ（feature / staging）は常に `noindex` のままです。記事が 0 件の一覧ページ（`/news` `/tutorials` `/columns`）は本番でも `noindex` で、`sitemap.xml` にも載りません。
 
 ---
 

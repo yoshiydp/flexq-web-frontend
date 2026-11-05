@@ -6,12 +6,17 @@ import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = pageMetadata({
-  title: "NEWS",
-  description:
-    "FlexQ のリリース情報・アップデート・イベントのお知らせ一覧です。",
-  path: "/news",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const items = await getAllNewsItems();
+  return pageMetadata({
+    title: "NEWS",
+    description:
+      "FlexQ のリリース情報・アップデート・イベントのお知らせ一覧です。",
+    path: "/news",
+    // 記事がない間は空のページなので検索結果に出さない（sitemap からも外している）
+    noindex: items.length === 0,
+  });
+}
 
 export default async function NewsIndexPage() {
   const items = await getAllNewsItems();

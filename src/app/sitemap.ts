@@ -6,7 +6,7 @@ import { absoluteUrl, IS_INDEXABLE, SITE_URL } from "@/lib/site";
 /**
  * /sitemap.xml を生成する。
  *
- * 一般公開前（IS_INDEXABLE が false）は robots.txt が全 URL を拒否しているため、
+ * Production 以外（IS_INDEXABLE が false）は robots.txt が全 URL を拒否しているため、
  * sitemap を出しても意味がないうえ、未公開ページの一覧を晒すことになる。
  * そのため robots.ts と同じ条件で空にする。
  */
@@ -14,14 +14,14 @@ import { absoluteUrl, IS_INDEXABLE, SITE_URL } from "@/lib/site";
 /** CMS に依存しない固定ページ */
 const STATIC_PATHS = [
   "/",
-  routes.news,
-  routes.tutorials,
-  routes.columns,
   routes.terms,
   routes.privacyPolicy,
   routes.accountDeletion,
   routes.contact,
 ];
+
+/** 記事があるときだけ載せる一覧ページ（0 件の間は noindex の空ページになる） */
+const LIST_PATHS = [routes.news, routes.tutorials, routes.columns];
 
 // ISR: 記事の追加は最長 60 秒で sitemap に反映される（各ページと同じ間隔）
 export const revalidate = 60;
@@ -40,7 +40,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // CMS 停止中・取得失敗時は空配列が返るため、その場合は固定ページだけになる
   const articlePaths = await getAllArticlePaths();
 
-  const paths = [...STATIC_PATHS, ...articlePaths];
+  const listPaths = LIST_PATHS.filter((list) =>
+    articlePaths.some((path) => path.startsWith(`${list}/`)),
+  );
+
+  const paths = [...STATIC_PATHS, ...listPaths, ...articlePaths];
 
   // lastModified は付けない。CMS の日付は表示用に YYYY.MM.DD へ整形済みで、
   // 正確な更新日時を保持していないため、誤った値を送るより省く方がよい

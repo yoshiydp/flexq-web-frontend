@@ -32,14 +32,18 @@ export const CONTACT_EMAIL = "contact@flexqstudio.com";
 /** OG 画像（1200x630）。SITE_URL からの相対パスで metadata に渡す */
 export const OG_IMAGE_PATH = "/og.png";
 
+/** App Store の FlexQ のページ。CTA のバッジと構造化データから参照する */
+export const APP_STORE_URL =
+  "https://apps.apple.com/jp/app/flexq/id6762039606";
+
 /**
- * 一般公開したら true にする。
+ * 検索エンジンへの公開スイッチ（2026-11-05 に公開）。
  *
  * Preview デプロイ（feature ブランチ・staging）が検索結果に出てしまうと
- * 本番と重複してしまうため、公開後も Production 以外は常に noindex のままにする。
+ * 本番と重複してしまうため、Production 以外は常に noindex のままにする。
  * ローカル開発では VERCEL_ENV が未定義なので、こちらも noindex になる。
  */
-const ALLOW_INDEXING = false;
+const ALLOW_INDEXING = true;
 
 export const IS_INDEXABLE =
   ALLOW_INDEXING && process.env.VERCEL_ENV === "production";

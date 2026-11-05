@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { OG_IMAGE_PATH, SITE_NAME } from "./site";
+import { IS_INDEXABLE, OG_IMAGE_PATH, SITE_NAME } from "./site";
 
 type PageMetadataInput = {
   /** 画面名。ルートの template によって `%s | FlexQ` になる */
@@ -9,6 +9,11 @@ type PageMetadataInput = {
   path: string;
   /** 記事ページは "article"、それ以外は "website" */
   type?: "website" | "article";
+  /**
+   * 検索結果に出さないページ（記事が 0 件の一覧など）。リンクはたどってもらう。
+   * Preview ではルートの noindex, nofollow をそのまま使うため、本番でだけ上書きする
+   */
+  noindex?: boolean;
 };
 
 /**
@@ -24,6 +29,7 @@ export function pageMetadata({
   description,
   path,
   type = "website",
+  noindex = false,
 }: PageMetadataInput): Metadata {
   // og:title には template が効かないため、ここでサイト名を付ける
   const ogTitle = `${title} | ${SITE_NAME}`;
@@ -32,6 +38,9 @@ export function pageMetadata({
     title,
     description,
     alternates: { canonical: path },
+    ...(noindex && IS_INDEXABLE
+      ? { robots: { index: false, follow: true } }
+      : {}),
     openGraph: {
       type,
       locale: "ja_JP",

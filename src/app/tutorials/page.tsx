@@ -6,12 +6,17 @@ import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = pageMetadata({
-  title: "TUTORIAL",
-  description:
-    "FlexQ の使い方を、順番に学べるチュートリアル一覧です。",
-  path: "/tutorials",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const items = await getAllTutorialItems();
+  return pageMetadata({
+    title: "TUTORIAL",
+    description:
+      "FlexQ の使い方を、順番に学べるチュートリアル一覧です。",
+    path: "/tutorials",
+    // 記事がない間は空のページなので検索結果に出さない（sitemap からも外している）
+    noindex: items.length === 0,
+  });
+}
 
 export default async function TutorialsIndexPage() {
   const tutorials = await getAllTutorialItems();

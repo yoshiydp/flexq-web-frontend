@@ -1,4 +1,5 @@
 import {
+  APP_STORE_URL,
   CONTACT_EMAIL,
   SITE_DESCRIPTION,
   SITE_NAME,
@@ -49,6 +50,7 @@ export default function StructuredData() {
         applicationCategory: "MusicApplication",
         // Android 版の公開時に "iOS, Android" へ戻す
         operatingSystem: "iOS",
+        installUrl: APP_STORE_URL,
         inLanguage: "ja",
         url: SITE_URL,
         publisher: { "@id": absoluteUrl("/#organization") },

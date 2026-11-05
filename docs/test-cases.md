@@ -30,7 +30,7 @@ npx playwright test --grep "CT-04 "            # ケース単位
 - **Strapi（CMS）は接続していない状態**を基準にする。本番は CMS 休止中（2026-08-15 決定）で、トップページはフォールバック文言（`src/content/fallbacks.ts`）で描画され、NEWS / LEARN セクションと記事への導線は出ない
 - Strapi に依存するケースは「Strapi 稼働時」と明記している。自動ケースは Strapi の有無どちらでも成立するように書いてあり、成立しない側はスキップになる（ER-02 / ER-03 はどちらか一方が必ずスキップ）
 - 自動ケースはローカル（または CI）の本番ビルド（`yarn build` → `yarn start`）に対して実行する。Vercel の Preview（staging）は Vercel Authentication で保護されていて Playwright・`curl` から開けないため、staging での確認は手動になる
-- 一般公開前（`src/lib/site.ts` の `ALLOW_INDEXING = false`）の出力を正とする。公開時の確認は SE-09
+- SEO はローカル・CI・Preview の出力（`VERCEL_ENV` が production 以外 = noindex）を正とする。本番の出力の確認は SE-09
 
 ### ライブラリ更新時に staging で最低限見るケース（★）
 
@@ -157,15 +157,16 @@ Google OAuth の同意画面（アプリのログイン）から参照される�
 
 | No | 確認すること | 前提条件 | 手順 | 期待される結果 | 区分 | E2E |
 |----|----|----|----|----|----|----|
-| SE-01 | robots.txt | 一般公開前 | `/robots.txt` を開く | `User-Agent: *` / `Disallow: /` だけを返す（`Allow` と `Sitemap` はない） | 自動 | `seo.spec.ts`（PC のみ） |
-| SE-02 | sitemap.xml | 一般公開前 | `/sitemap.xml` を開く | 200 で、`<url>` を 1 つも含まない空の `<urlset>` を返す（未公開ページの一覧を晒さない） | 自動 | `seo.spec.ts`（PC のみ） |
-| SE-03 | noindex | 一般公開前 | `/` `/news` `/tutorials` `/columns` `/terms` `/privacy-policy` `/contact` のソースを見る | すべて `<meta name="robots" content="noindex, nofollow, nocache">` が入っている | 自動 | `seo.spec.ts`（PC のみ） |
+| SE-01 | robots.txt | 本番以外 | `/robots.txt` を開く | `User-Agent: *` / `Disallow: /` だけを返す（`Allow` と `Sitemap` はない） | 自動 | `seo.spec.ts`（PC のみ） |
+| SE-02 | sitemap.xml | 本番以外 | `/sitemap.xml` を開く | 200 で、`<url>` を 1 つも含まない空の `<urlset>` を返す（未公開ページの一覧を晒さない） | 自動 | `seo.spec.ts`（PC のみ） |
+| SE-03 | noindex | 本番以外 | `/` `/news` `/tutorials` `/columns` `/terms` `/privacy-policy` `/contact` のソースを見る | すべて `<meta name="robots" content="noindex, nofollow, nocache">` が入っている | 自動 | `seo.spec.ts`（PC のみ） |
 | SE-04 | title / description / canonical / OGP | — | SE-03 の各ページのソースを見る | title はサブページが「NEWS \| FlexQ」のように「画面名 \| FlexQ」、トップは「FlexQ — YOUR MUSIC. YOUR WORDS.」。description があり、canonical と `og:url` がそのページの絶対 URL（トップは末尾スラッシュなし）、`og:title` = title、`og:description` = description、`og:type` website・`og:locale` ja_JP・`og:site_name` FlexQ、`og:image` / `twitter:image` が `/og.png`、`twitter:card` が summary_large_image | 自動 | `seo.spec.ts`（PC のみ） |
 | SE-05 | OG 画像 | — | `/og.png` を開く | 1200x630 の PNG が表示される | 自動 | `seo.spec.ts`（PC のみ） |
-| SE-06 | 構造化データ | — | `/` のソースの `application/ld+json` を見る（[リッチリザルトテスト](https://search.google.com/test/rich-results) でも可） | `@graph` に Organization / WebSite / MobileApplication の 3 つがあり、アプリは無料（`offers.price` が "0"） | 自動 | `seo.spec.ts`（PC のみ） |
+| SE-06 | 構造化データ | — | `/` のソースの `application/ld+json` を見る（[リッチリザルトテスト](https://search.google.com/test/rich-results) でも可） | `@graph` に Organization / WebSite / MobileApplication の 3 つがあり、アプリは無料（`offers.price` が "0"）、`installUrl` が App Store の URL | 自動 | `seo.spec.ts`（PC のみ） |
 | SE-07 | SNS でのシェア表示 | 本番 | トップと `/contact` の URL を X・LINE・Facebook（[シェアデバッガー](https://developers.facebook.com/tools/debug/)）に貼る | OG 画像・タイトル・説明文のカードが表示される。サブページは「CONTACT \| FlexQ」などページごとのタイトルになる | 手動 | — |
 | SE-08 | 記事詳細の meta | Strapi 稼働時 | 記事詳細のソースを見る | title が記事の SEO タイトル +「 \| FlexQ」、`og:type` が article、canonical が記事の URL、description が記事の SEO 説明文（未設定なら抜粋） | 手動 | — |
-| SE-09 | 一般公開時の出力 | `ALLOW_INDEXING = true` にした本番（リリース手順は README の「一般公開時にやること」） | 本番の `/robots.txt` `/sitemap.xml` とトップのソースを見る | robots.txt が `Allow: /` + `Sitemap:`、sitemap.xml に固定ページ（+ 記事）の URL が並び、meta robots が index, follow になる。Preview（staging）は公開後も noindex のまま | 手動 | — |
+| SE-09 | 本番の出力 | 本番 | 本番の `/robots.txt` `/sitemap.xml` とトップ・`/news` のソースを見る | robots.txt が `Allow: /` + `Sitemap:`、sitemap.xml に固定ページ（+ 記事）の URL が並び、トップの meta robots が index, follow になる。記事が 0 件の `/news` `/tutorials` `/columns` は sitemap に載らず、meta robots が noindex, follow になる。Preview（staging）は noindex のまま | 手動 | — |
+| SE-10 | 正規ドメインへの転送 | — | Host ヘッダーを `www.flexqstudio.com` / `flexq-web-frontend.vercel.app` にして `/contact` を取得する（本番では `curl -I https://www.flexqstudio.com/contact`） | 308 で `https://flexqstudio.com/contact` へ転送される | 自動 | `seo.spec.ts`（PC のみ） |
 
 ## 9. レスポンシブ（RS）
 

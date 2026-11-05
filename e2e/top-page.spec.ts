@@ -74,16 +74,19 @@ test.describe("TP トップページ", { tag: "@TP" }, () => {
     await cta.scrollIntoViewIfNeeded();
     // Google Play は URL 設定後（Android 版の公開後）だけバッジが出る
     const googlePlay = cta.getByRole("link", { name: /Google Play/ });
+    const appStore = cta.getByRole("link", { name: /App Store/ });
+    // CMS 稼働時は URL を上書きできる（計測用パラメータなど）ため、完全一致にしない
+    await expect(appStore).toHaveAttribute(
+      "href",
+      /^https:\/\/apps\.apple\.com\/.*id6762039606/,
+    );
     const badges = [
-      cta.getByRole("link", { name: /App Store/ }),
+      appStore,
       ...((await googlePlay.count()) > 0 ? [googlePlay] : []),
     ];
     for (const badge of badges) {
       await expect(badge).toBeVisible();
-      // ストア URL が未設定の間は CTA へのアンカー、設定後は新しいタブでストアを開く
-      const href = await badge.getAttribute("href");
-      if (href === "/#download") continue;
-      expect(href).toMatch(/^https:\/\//);
+      expect(await badge.getAttribute("href")).toMatch(/^https:\/\//);
       await expect(badge).toHaveAttribute("target", "_blank");
     }
   });

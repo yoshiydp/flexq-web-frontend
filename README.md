@@ -25,7 +25,7 @@
 > **現在の公開状況**
 >
 > - **サイトは独自ドメインで配信中**ですが、アプリのストア公開前のため**検索エンジンには露出させていません**（全ページ `noindex`・`robots.txt` は全拒否）。アプリの一般公開は 2026 年内を予定しています
-> - **ストアバッジのリンク先は未設定**です。設定するまではページ内のダウンロード CTA へのアンカーになります
+> - **ストアバッジは App Store へリンクしています**。Google Play のバッジは Android 版の公開まで表示しません
 > - **CMS（Strapi）は休止中**で、本番は `src/content/fallbacks.ts` の文言による静的 LP として動いています。News / Learn セクションと記事ページへの導線は自動的に非表示になります（[コンテンツ管理](#コンテンツ管理)を参照）
 >
 > 公開時に必要な作業は[一般公開時にやること](#一般公開時にやること)にまとめています。
@@ -407,7 +407,7 @@ DNS レコードの一覧、ConoHa を解約してはいけない理由、トラ
 アプリのストア公開に合わせて実施します。
 
 1. `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする（`noindex` が外れ、`robots.txt` が `Allow: /` になり、`sitemap.xml` に URL が並ぶ）。**これを忘れると、公開しても検索結果に一切出ません**
-2. `src/content/fallbacks.ts` の `cta.appStoreUrl` / `cta.googlePlayUrl` にストアの URL を設定する
+2. `src/content/fallbacks.ts` の `cta.googlePlayUrl` に Google Play の URL を設定する（Android 版の公開時。`cta.appStoreUrl` は設定済み）
 3. Google Search Console に `flexqstudio.com` を登録し、`/sitemap.xml` を送信する
 4. 公開後、`https://flexqstudio.com/robots.txt` が `Allow: /` になっていることを確認する
 

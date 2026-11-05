@@ -6,12 +6,17 @@ import { pageMetadata } from "@/lib/metadata";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = pageMetadata({
-  title: "COLUMN",
-  description:
-    "書くことをめぐる読みもの。FlexQ のコラム一覧です。",
-  path: "/columns",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const items = await getAllColumnItems();
+  return pageMetadata({
+    title: "COLUMN",
+    description:
+      "書くことをめぐる読みもの。FlexQ のコラム一覧です。",
+    path: "/columns",
+    // 記事がない間は空のページなので検索結果に出さない（sitemap からも外している）
+    noindex: items.length === 0,
+  });
+}
 
 export default async function ColumnsIndexPage() {
   const columns = await getAllColumnItems();

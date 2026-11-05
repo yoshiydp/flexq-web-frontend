@@ -248,15 +248,13 @@ lyrics-web-frontend/
 - `SITE_DESCRIPTION` / `SITE_TITLE` は `src/content/fallbacks.ts` の `seoDescription` / `seoTitle`
   からも参照している。CMS 未投入時に metadata とページ内容が食い違わないようにするため
 
-### 公開時にやること
+### 公開状態
 
-1. `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする
-   → noindex が外れ、`/robots.txt` が `Allow: /` + `Sitemap:` になり、`/sitemap.xml` に URL が並ぶ。
-   Preview デプロイ（feature / staging）は `VERCEL_ENV` の判定により公開後も noindex のまま
-2. Google Search Console に `flexqstudio.com` を登録し、`/sitemap.xml` を送信する
-
-> 独自ドメインの設定（Vercel へのドメイン追加・DNS・`NEXT_PUBLIC_SITE_URL`）は 2026-09-06 に完了済み。
-> **`ALLOW_INDEXING` を戻し忘れると、公開しても検索結果に一切出ない**ため、リリース手順に必ず含めること。
+- `src/lib/site.ts` の `ALLOW_INDEXING` は `true`（2026-11-05 に検索エンジンへ公開）。
+  Preview デプロイ（feature / staging）とローカルは `VERCEL_ENV` の判定により noindex のまま
+- 記事が 0 件の一覧ページ（`/news` `/tutorials` `/columns`）は本番でも noindex で、sitemap にも載らない。
+  記事が入ると自動で index 対象になる
+- `www.flexqstudio.com` と `flexq-web-frontend.vercel.app` は `next.config.ts` の `redirects` で正規ドメインへ 308 転送する
 
 ---
 
@@ -592,8 +590,8 @@ curl -s -o /dev/null -w "%{http_code}\n" https://flexqstudio.com/
 | 項目 | 値 |
 |------|---|
 | プロジェクト名 | `flexq-web`（FlexQ Web チーム。旧 `lyrics-web-frontend` から 2026-08-15 リネーム） |
-| 本番 URL | https://flexqstudio.com （`www` も同じ内容を配信） |
-| 予備 URL | `flexq-web-frontend.vercel.app`（確認用として並存） |
+| 本番 URL | https://flexqstudio.com |
+| 転送 | `www.flexqstudio.com` と `flexq-web-frontend.vercel.app` は本番 URL へ 308 転送（`next.config.ts`） |
 | 旧 URL | `lyrics-web-frontend.vercel.app`（`flexq-web-frontend.vercel.app` へ 307 リダイレクト） |
 | ダッシュボード | Vercel「FlexQ Web」チーム内の `flexq-web` プロジェクト |
 

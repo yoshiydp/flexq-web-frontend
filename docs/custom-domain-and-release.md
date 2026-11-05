@@ -5,7 +5,7 @@ FlexQ プロモサイトの配信構成（Vercel + 独自ドメイン `flexqstud
 
 - **サイトの表示**: Vercel（`master` へのマージで自動デプロイ）
 - **メール・DNS**: ConoHa WING（契約継続が必要）
-- **検索エンジンからの露出**: ブロック中（`ALLOW_INDEXING = false`）
+- **検索エンジンからの露出**: 公開中（2026-11-05 に `ALLOW_INDEXING = true`）
 
 ---
 
@@ -15,7 +15,7 @@ FlexQ プロモサイトの配信構成（Vercel + 独自ドメイン `flexqstud
 
 ```
 GitHub (master)  ──自動デプロイ──▶  Vercel  ──▶  https://flexqstudio.com
-                                                  https://www.flexqstudio.com
+                                                  https://www.flexqstudio.com（正規ドメインへ 308 転送）
 
 ConoHa WING  ──▶  contact@flexqstudio.com（メール）
              ──▶  ns-a1/a2/a3.conoha.io（DNS）
@@ -85,7 +85,7 @@ vercel ls flexq-web | head -10
 
 > Preview には `NEXT_PUBLIC_SITE_URL` を設定していないが、`src/lib/site.ts` の既定値が
 > 独自ドメインなので canonical / OG は本番と同じ URL で出力される。
-> また Preview は `VERCEL_ENV=preview` のため、**一般公開後も常に noindex** になる。
+> また Preview は `VERCEL_ENV=preview` のため、**常に noindex** になる。
 
 > Preview は Vercel Authentication で保護されており、**匿名アクセスは 302 で SSO に飛ぶ**。
 > ログイン済みのブラウザからは閲覧できるが、`curl` での自動確認はできない。
@@ -96,8 +96,8 @@ vercel ls flexq-web | head -10
 
 - 変更した画面が意図どおり表示されるか（PC / SP 両方のビューポート）
 - コンソールエラーが出ていないか
-- 一般公開前は `<meta name="robots">` が `noindex` のままか
-- 公開後はリンク先・canonical が独自ドメインを指しているか
+- `<meta name="robots">` が `noindex` のままか（Preview は常に noindex）
+- リンク先・canonical が独自ドメインを指しているか
 
 **手順 7（本番反映後）で確認すること**
 
@@ -117,7 +117,7 @@ curl -s https://flexqstudio.com/ | grep -io '<meta name="robots"[^>]*>'
 | チーム | FlexQ Web |
 | プロジェクト | `flexq-web` |
 | 本番ドメイン | `flexqstudio.com` / `www.flexqstudio.com` |
-| 予備ドメイン | `flexq-web-frontend.vercel.app`（確認用に並存） |
+| 予備ドメイン | `flexq-web-frontend.vercel.app`（正規ドメインへ 308 転送） |
 | Production 環境変数 | `NEXT_PUBLIC_SITE_URL=https://flexqstudio.com` |
 
 > Preview デプロイには `NEXT_PUBLIC_SITE_URL` を設定していない。
@@ -215,82 +215,48 @@ ConoHa WING での場所:
 
 ---
 
-## 3. 検索エンジンからのブロック（noindex）
+## 3. 検索エンジンへの公開（noindex の制御）
 
-アプリのストアリリース前のため、**サイトは検索エンジンに一切露出させていない**。
+2026-11-05 の App Store 公開に合わせて、**本番を検索エンジンへ公開した**。
 
 ### 仕組み
 
-判定はドメインではなく `src/lib/site.ts` の定数 1 箇所で決まる。
+判定は `src/lib/site.ts` の定数 1 箇所で決まる。
 
 ```ts
-const ALLOW_INDEXING = false;   // 公開時に true にする
+const ALLOW_INDEXING = true;
 
 export const IS_INDEXABLE =
   ALLOW_INDEXING && process.env.VERCEL_ENV === "production";
 ```
 
-`ALLOW_INDEXING` が `false` の間は、ドメインや環境に関係なく必ずブロックされる。
-`true` にしたあとも `VERCEL_ENV` の判定により、**Preview デプロイ（feature / staging）は
-公開後も noindex のまま**になる（本番とコンテンツが重複するのを防ぐため）。
+`VERCEL_ENV` の判定により、**Preview デプロイ（feature / staging）とローカルは noindex のまま**になる
+（本番とコンテンツが重複するのを防ぐため）。
 
-| ファイル | 非公開時の挙動 |
-|---------|--------------|
-| `src/app/layout.tsx` | 全ページに `<meta name="robots" content="noindex, nofollow, nocache">` |
-| `src/app/robots.ts` | `/robots.txt` が `Disallow: /` |
-| `src/app/sitemap.ts` | `/sitemap.xml` が空の `<urlset>` |
+| ファイル | 本番 | 本番以外 |
+|---------|-----|---------|
+| `src/app/layout.tsx` | `index, follow` | `noindex, nofollow, nocache` |
+| `src/app/robots.ts` | `Allow: /` + `Sitemap:` | `Disallow: /` |
+| `src/app/sitemap.ts` | 固定ページ + 記事の URL | 空の `<urlset>` |
 
-### 現在の出力（本番で確認済み）
+記事が 0 件の一覧ページ（`/news` `/tutorials` `/columns`）は本番でも `noindex, follow` で、sitemap にも載らない。
+記事が入ると自動で index 対象になる。
 
-```
-$ curl https://flexqstudio.com/robots.txt
-User-Agent: *
-Disallow: /
+`www.flexqstudio.com` と `flexq-web-frontend.vercel.app` は `next.config.ts` の `redirects` で
+`https://flexqstudio.com` へ 308 転送する。
 
-$ curl https://flexqstudio.com/sitemap.xml
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>
+### 本番の確認
 
-$ curl https://flexqstudio.com/ | grep robots
-<meta name="robots" content="noindex, nofollow, nocache"/>
-```
-
-### 公開時の出力
-
-```
-$ curl https://flexqstudio.com/robots.txt
-User-Agent: *
-Allow: /
-
-Host: https://flexqstudio.com
-Sitemap: https://flexqstudio.com/sitemap.xml
-
-$ curl https://flexqstudio.com/sitemap.xml
-（/ ・/news ・/tutorials ・/columns ・/terms ・/privacy-policy ＋ 公開済み記事の全 URL）
-```
-
-### 補足: robots.txt と meta noindex の併用について
-
-現在は robots.txt の全拒否と meta noindex を二重にかけている。
-厳密には、**robots.txt でクロールを止めるとクローラーが meta noindex を読めない**ため、
-外部リンクが存在すると URL だけがインデックスされる可能性が理論上ある。
-現時点で外部リンクは存在しないため実害はなく、公開時には両方同時に解除されるので問題にならない。
+`docs/test-cases.md` の SE-09 / SE-10 を参照。
 
 ---
 
-## 4. 本番公開までに必要な対応
+## 4. 本番公開の対応状況
 
-アプリのストアリリースに合わせて実施する。
-
-- [ ] **`src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする**
-      → noindex が外れ、robots.txt が `Allow: /` + `Sitemap:` になり、sitemap.xml に URL が並ぶ。
-      **これを忘れると、公開してもサイトが検索結果に一切表示されない**
+- [x] `src/lib/site.ts` の `ALLOW_INDEXING` を `true` にする（WEB-6）
+- [x] App Store の URL を設定する（WEB-5）
 - [ ] Google Search Console に `flexqstudio.com` を登録し、`/sitemap.xml` を送信する
-- [ ] CTA のストア URL（App Store / Google Play）を設定する
-      （`src/content/fallbacks.ts` の `cta.appStoreUrl` / `cta.googlePlayUrl` が現在 `null`。
-      未設定の間もバッジは表示され、リンク先がページ内のダウンロード CTA へのアンカーになる）
-- [ ] 公開後、実際に `https://flexqstudio.com/robots.txt` が `Allow: /` になっているか確認する
+- [ ] Android 版の公開時に `src/content/fallbacks.ts` の `cta.googlePlayUrl` を設定する
 
 ### 対応済み（2026-09-06）
 
@@ -367,7 +333,7 @@ done
 dig +short flexqstudio.com MX
 dig +short flexqstudio.com TXT
 
-# noindex が維持されているか
+# robots / sitemap / meta robots の出力
 curl -s https://flexqstudio.com/robots.txt
 curl -s https://flexqstudio.com/sitemap.xml
 curl -s https://flexqstudio.com/ | grep -io '<meta name="robots"[^>]*>'

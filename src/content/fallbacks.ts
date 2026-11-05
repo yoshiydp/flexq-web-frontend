@@ -1,5 +1,5 @@
 import { routes } from "@/lib/routes";
-import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
+import { APP_STORE_URL, SITE_DESCRIPTION, SITE_TITLE } from "@/lib/site";
 import type { TopPageContent } from "@/types/content";
 
 /**
@@ -137,7 +137,7 @@ export const topPageFallback: TopPageContent = {
     heading: "さあ、次の一節を。",
     // 改行は CtaSection の whitespace-pre-line で表示する
     lead: "アプリは無料でダウンロードできます。\niPhone で、今すぐ書きはじめられます。\nAndroid 版は準備中です。",
-    appStoreUrl: "https://apps.apple.com/jp/app/flexq/id6762039606",
+    appStoreUrl: APP_STORE_URL,
     googlePlayUrl: null,
   },
 

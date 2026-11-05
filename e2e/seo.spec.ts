@@ -4,9 +4,8 @@ import { expect, test } from "@playwright/test";
  * SEO / OGP / robots / sitemap（docs/test-cases.md「8. SEO / OGP（SE）」）。
  *
  * 表示幅に依存しないため desktop プロジェクトでのみ実行する（playwright.config.ts の testIgnore）。
- * 一般公開前の状態（src/lib/site.ts の ALLOW_INDEXING=false）を前提にする。
- * ALLOW_INDEXING を true にしても、IS_INDEXABLE は VERCEL_ENV=production のときだけ true になるため、
- * ローカル・CI の E2E では常に noindex の出力になる（公開時の出力は SE-09 の手動確認）。
+ * IS_INDEXABLE は VERCEL_ENV=production のときだけ true になるため、
+ * ローカル・CI の E2E では常に noindex の出力になる（本番の出力は SE-09 の手動確認）。
  * canonical / og:url のドメインは NEXT_PUBLIC_SITE_URL で変わるため、パス部分だけを検証する。
  */
 
@@ -21,7 +20,7 @@ const PAGES = [
 ] as const;
 
 test.describe("SE SEO / OGP", { tag: "@SE" }, () => {
-  test("SE-01 robots.txt は公開前は全クローラーを拒否する", async ({
+  test("SE-01 robots.txt は本番以外では全クローラーを拒否する", async ({
     request,
   }) => {
     const res = await request.get("/robots.txt");
@@ -33,7 +32,7 @@ test.describe("SE SEO / OGP", { tag: "@SE" }, () => {
     expect(body).not.toMatch(/^Allow:/m);
   });
 
-  test("SE-02 sitemap.xml は公開前は空の urlset を返す", async ({
+  test("SE-02 sitemap.xml は本番以外では空の urlset を返す", async ({
     request,
   }) => {
     const res = await request.get("/sitemap.xml");
@@ -46,7 +45,7 @@ test.describe("SE SEO / OGP", { tag: "@SE" }, () => {
     expect(body).not.toContain("<url>");
   });
 
-  test("SE-03 全ページが noindex になっている", async ({ page }) => {
+  test("SE-03 本番以外では全ページが noindex になっている", async ({ page }) => {
     for (const { path } of PAGES) {
       await page.goto(path);
       await expect(
@@ -115,11 +114,34 @@ test.describe("SE SEO / OGP", { tag: "@SE" }, () => {
       .first()
       .textContent();
     const data = JSON.parse(json ?? "{}") as {
-      "@graph": { "@type": string; offers?: { price: string } }[];
+      "@graph": {
+        "@type": string;
+        offers?: { price: string };
+        installUrl?: string;
+      }[];
     };
     const types = data["@graph"].map((node) => node["@type"]);
     expect(types).toEqual(["Organization", "WebSite", "MobileApplication"]);
     const app = data["@graph"].find((n) => n["@type"] === "MobileApplication");
     expect(app?.offers?.price).toBe("0");
+    expect(app?.installUrl).toMatch(/^https:\/\/apps\.apple\.com\//);
+  });
+
+  test("SE-10 正規ドメイン以外のホストは正規ドメインへ 308 で転送する", async ({
+    request,
+  }) => {
+    for (const host of [
+      "www.flexqstudio.com",
+      "flexq-web-frontend.vercel.app",
+    ]) {
+      const res = await request.get("/contact", {
+        headers: { host },
+        maxRedirects: 0,
+      });
+      expect(res.status(), host).toBe(308);
+      expect(res.headers().location, host).toBe(
+        "https://flexqstudio.com/contact",
+      );
+    }
   });
 });

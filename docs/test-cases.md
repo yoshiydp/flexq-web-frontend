@@ -167,6 +167,7 @@ Google OAuth の同意画面（アプリのログイン）から参照される�
 | SE-08 | 記事詳細の meta | Strapi 稼働時 | 記事詳細のソースを見る | title が記事の SEO タイトル +「 \| FlexQ」、`og:type` が article、canonical が記事の URL、description が記事の SEO 説明文（未設定なら抜粋） | 手動 | — |
 | SE-09 | 本番の出力 | 本番 | 本番の `/robots.txt` `/sitemap.xml` とトップ・`/news` のソースを見る | robots.txt が `Allow: /` + `Sitemap:`、sitemap.xml に固定ページ（+ 記事）の URL が並び、トップの meta robots が index, follow になる。記事が 0 件の `/news` `/tutorials` `/columns` は sitemap に載らず、meta robots が noindex, follow になる。Preview（staging）は noindex のまま | 手動 | — |
 | SE-10 | 正規ドメインへの転送 | — | Host ヘッダーを `www.flexqstudio.com` / `flexq-web-frontend.vercel.app` にして `/contact` を取得する（本番では `curl -I https://www.flexqstudio.com/contact`） | 308 で `https://flexqstudio.com/contact` へ転送される | 自動 | `seo.spec.ts`（PC のみ） |
+| SE-11 | ファビコン | — | トップのソースの `<link rel="icon">` / `<link rel="apple-touch-icon">` を見て、`/favicon.ico` `/icon.svg` `/apple-icon.png` を開く。ブラウザのタブと iPhone の「ホーム画面に追加」でも確認する | `favicon.ico`（16 / 32 / 48px）・`icon.svg`・`apple-icon.png`（180x180）の 3 つが出力・配信され、どれも紫背景にゴールドの Q（`public/flexq-logo.svg` の Q）。Next.js 雛形の Vercel ロゴ（黒丸に白三角）ではない | 自動（タブ・ホーム画面の見た目は手動） | `seo.spec.ts`（PC のみ） |
 
 ## 9. レスポンシブ（RS）
 

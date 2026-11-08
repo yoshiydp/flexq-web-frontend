@@ -237,6 +237,7 @@ lyrics-web-frontend/
 | `src/app/sitemap.ts` | `/sitemap.xml`（`IS_INDEXABLE` が false の間は空で返す） |
 | `src/components/seo/StructuredData.tsx` | トップページの JSON-LD（Organization / WebSite / MobileApplication） |
 | `public/og.png` | OG 画像（1200x630） |
+| `src/app/favicon.ico` / `icon.svg` / `apple-icon.png` | ファビコン（`public/flexq-logo.svg` の Q を紫背景に載せたもの。App Router のファイル規約で `<link>` が自動出力される）。**手で編集せず `node scripts/generate-favicon.mjs` で再生成する**（ロゴを差し替えたときも再実行） |
 
 ### 注意点
 

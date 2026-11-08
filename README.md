@@ -171,7 +171,8 @@
 │   │   ├── layout.tsx           # ルートレイアウト（フォント・metadata・慣性スクロール）
 │   │   ├── template.tsx         # ページ遷移のフェード
 │   │   ├── loading.tsx          # 読み込み中の波形ローダー
-│   │   └── globals.css          # Tailwind・カラー変数・リビールのアニメーション
+│   │   ├── globals.css          # Tailwind・カラー変数・リビールのアニメーション
+│   │   └── favicon.ico / icon.svg / apple-icon.png  # ファビコン（scripts/generate-favicon.mjs で生成）
 │   ├── components/
 │   │   ├── canvas/              # WebGL キービジュアル（react-three-fiber + GLSL）
 │   │   ├── layout/              # ヘッダー・フッター・SP メニュー・慣性スクロール・ページ遷移
@@ -191,6 +192,7 @@
 │   ├── preview/                 # APP PREVIEW の画面収録（mp4 / webm / ポスター）
 │   ├── badges/                  # App Store / Google Play の公式バッジ
 │   ├── bg-*.png                 # 各セクションの背景
+│   ├── flexq-logo.svg           # ロゴ（ファビコンの元。scripts/generate-favicon.mjs で src/app/ に生成）
 │   └── og.png                   # OG 画像（1200x630）
 ├── e2e/                         # Playwright のフロー（テスト名の先頭が docs/test-cases.md のケース ID）
 ├── .github/workflows/ci.yml     # PR ごとの型チェック・Lint・Jest・ビルド・E2E
